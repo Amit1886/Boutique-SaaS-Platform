@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Confirm Order{% endblock %}
+{% block content %}
+  <div class="grid lg:grid-cols-2 gap-8 items-start">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-bold">Confirm your order</h1>
+      <p class="text-slate-600 mt-2">Review your selected template, generated output, and measurements before placing the order request.</p>
+
+      <div class="mt-5 card overflow-hidden">
+        <img src="{{ tryon.auto_generated_image.url }}" alt="Generated try-on" class="w-full object-contain bg-white" />
+      </div>
+    </div>
+
+    <div class="card p-6 space-y-5">
+      <form method="post" class="space-y-5">
+        {% csrf_token %}
+        <input type="hidden" name="tryon_id" value="{{ tryon.id }}" />
+
+        <div>
+          <div class="text-sm uppercase tracking-wider text-slate-500">Selected template</div>
+          <div class="mt-2 flex items-center gap-4">
+            <img class="h-28 w-20 object-cover rounded-xl border border-slate-200" src="{{ tryon.selected_template.image.url }}" alt="{{ tryon.selected_template.name }}" />
+            <div>
+              <div class="font-semibold">{{ tryon.selected_template.name }}</div>
+              <div class="text-sm text-slate-600">{{ tryon.selected_template.get_category_display }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3 text-sm">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <div class="text-slate-500">Bust</div>
+            <div class="font-semibold">{{ tryon.bust_size }}</div>
+          </div>
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <div class="text-slate-500">Waist</div>
+            <div class="font-semibold">{{ tryon.waist_size }}</div>
+          </div>
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <div class="text-slate-500">Height</div>
+            <div class="font-semibold">{{ tryon.height }}</div>
+          </div>
+        </div>
+
+        <div>
+          <label class="label">Choose product to order</label>
+          {{ form.product }}
+        </div>
+
+        {% if form.errors %}
+          <div class="rounded-xl border border-rose-200 bg-rose-50 text-rose-900 p-3 text-sm">Please select a product.</div>
+        {% endif %}
+
+        <button class="btn-primary w-full" type="submit">Place Order</button>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+

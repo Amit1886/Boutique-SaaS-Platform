@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Language{% endblock %}
+{% block content %}
+  <div class="max-w-md mx-auto card p-8">
+    <h1 class="text-2xl font-bold">Language</h1>
+    <p class="mt-2 text-slate-600">Sets your profile language (EN/HIN). UI strings remain English by default.</p>
+    <form method="post" class="mt-6 space-y-4">
+      {% csrf_token %}
+      <div>
+        <label class="label">Preferred language</label>
+        {{ form.language }}
+      </div>
+      <button class="btn-primary w-full" type="submit">Save</button>
+    </form>
+  </div>
+{% endblock %}
+

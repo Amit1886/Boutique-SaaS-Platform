@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Boutique Pro{% endblock %}
+{% block content %}
+  <section class="rounded-3xl overflow-hidden bg-gradient-to-r from-pink-600 via-fuchsia-600 to-indigo-700 text-white">
+    <div class="px-8 py-12 md:px-12 md:py-16 grid md:grid-cols-2 gap-10 items-center">
+      <div>
+        <h1 class="text-3xl md:text-5xl font-extrabold leading-tight">
+          Your Boutique, <span class="text-pink-100">Now Virtual</span>
+        </h1>
+        <p class="mt-4 text-white/90 text-lg">
+          Browse sarees, blouses, lehengas, fall-pico stitching, and custom designs — then preview designs on your photo with auto-fit virtual try-on.
+        </p>
+        <div class="mt-6 flex flex-col sm:flex-row gap-3">
+          <a href="{% url 'tryon_upload' %}" class="btn-primary bg-white text-slate-900 hover:bg-white/90">Try Virtual Boutique</a>
+          <a href="{% url 'product_list' 'saree' %}" class="btn-secondary border-white/40 text-white hover:bg-white/10">Browse Sarees</a>
+        </div>
+      </div>
+      <div class="hidden md:block">
+        <div class="rounded-2xl bg-white/10 border border-white/20 p-6">
+          <div class="text-sm uppercase tracking-wider text-white/80">Quick Categories</div>
+          <div class="mt-4 grid grid-cols-2 gap-3">
+            {% for c, label in categories %}
+              <a href="{% url 'product_list' c %}" class="rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 p-4">
+                <div class="font-semibold">{{ label }}</div>
+                <div class="text-white/70 text-sm mt-1">Explore designs</div>
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="mt-10">
+    <div class="flex items-end justify-between gap-4">
+      <h2 class="text-xl md:text-2xl font-bold">Featured</h2>
+      <a class="text-sm text-pink-700 hover:underline" href="{% url 'product_list' 'custom' %}">See custom design →</a>
+    </div>
+    <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      {% for p in featured %}
+        <div class="card">
+          <img src="{{ p.image.url }}" alt="{{ p.name }}" class="h-44 w-full object-cover" />
+          <div class="p-4">
+            <div class="font-semibold">{{ p.name }}</div>
+            <div class="text-sm text-slate-600 mt-1">{{ p.get_category_display }}</div>
+            <div class="mt-3 flex items-center justify-between">
+              <div class="font-bold text-slate-900">₹{{ p.price }}</div>
+              <a class="btn-primary text-sm" href="{% url 'tryon_upload' %}?product={{ p.id }}">Try On</a>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <div class="text-slate-600">No products yet. Run migrations to seed demo data.</div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="mt-12 rounded-3xl bg-white border border-slate-200 p-8 md:p-10">
+    <div class="grid md:grid-cols-3 gap-6">
+      <div>
+        <div class="text-sm uppercase tracking-wider text-slate-500">How it works</div>
+        <h3 class="mt-2 text-2xl font-bold">Upload → Preview → Generate → Order</h3>
+        <p class="mt-3 text-slate-600">
+          Upload your photo and measurements, pick a template design from the scrolling gallery, generate a virtual try-on image, then place your order request.
+        </p>
+      </div>
+      <div class="md:col-span-2 grid sm:grid-cols-2 gap-4">
+        <div class="rounded-2xl border border-slate-200 p-5 bg-slate-50">
+          <div class="font-semibold">Auto-fit overlay</div>
+          <div class="text-sm text-slate-600 mt-1">Templates auto-scale to your photo width for instant preview.</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 p-5 bg-slate-50">
+          <div class="font-semibold">Admin approvals</div>
+          <div class="text-sm text-slate-600 mt-1">Admin reviews original photo, template, generated image, and measurements.</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 p-5 bg-slate-50">
+          <div class="font-semibold">REST API ready</div>
+          <div class="text-sm text-slate-600 mt-1">Products, templates, try-on requests, and orders available under /api/.</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 p-5 bg-slate-50">
+          <div class="font-semibold">Swap AI later</div>
+          <div class="text-sm text-slate-600 mt-1">Replace dummy functions with HuggingFace/StableDiffusion APIs when ready.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}
+

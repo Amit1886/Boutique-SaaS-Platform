@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Vendor Dashboard{% endblock %}
+{% block content %}
+  <div class="flex items-end justify-between gap-3">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-bold">Vendor Dashboard</h1>
+      <p class="text-slate-600 mt-1">Manage boutique, orders, inventory, POS, and analytics.</p>
+    </div>
+    {% if vendor %}
+      <a class="btn-primary" href="/{{ vendor.subdomain }}/">Open Store</a>
+    {% endif %}
+  </div>
+
+  {% if vendor %}
+    <div class="mt-6 grid md:grid-cols-3 gap-4">
+      <div class="card p-5">
+        <div class="text-sm text-slate-500">Business</div>
+        <div class="mt-1 font-semibold">{{ vendor.business_name }}</div>
+        <div class="mt-1 text-sm text-slate-600">Path: /{{ vendor.subdomain }}/</div>
+        <div class="mt-3 text-sm text-slate-600">Theme: <span class="font-semibold">{{ vendor.theme_color }}</span></div>
+        <div class="mt-2 text-sm text-slate-600">UPI: <span class="font-semibold">{{ vendor.upi_id|default:"—" }}</span></div>
+      </div>
+      <div class="card p-5">
+        <div class="text-sm text-slate-500">Plan</div>
+        <div class="mt-1 font-semibold">{{ vendor.plan.name|default:"—" }}</div>
+        {% if stats %}
+          <div class="mt-3 text-sm text-slate-600">Orders: <span class="font-semibold">{{ stats.orders }}</span></div>
+          <div class="mt-1 text-sm text-slate-600">Revenue: <span class="font-semibold">₹{{ stats.revenue }}</span></div>
+        {% endif %}
+        <div class="mt-3">
+          <a class="btn-secondary" href="{% url 'pricing' %}">Change Plan</a>
+        </div>
+      </div>
+      <div class="card p-5">
+        <div class="text-sm text-slate-500">Quick Links</div>
+        <div class="mt-3 flex flex-col gap-2">
+          <a class="navlink" href="{% url 'inventory_dashboard' %}">Fabric Inventory</a>
+          <a class="navlink" href="{% url 'pos_billing' %}">POS Billing</a>
+          <a class="navlink" href="/admin/">Django Admin</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-6 card p-6">
+      <div class="text-sm uppercase tracking-wider text-slate-500">Feature Access</div>
+      <div class="mt-4 grid sm:grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <div class="font-semibold">2D Try-On</div>
+          <div class="mt-1 text-slate-600">{% if "AI_VIRTUAL_TRYON_2D" in enabled_features %}Enabled{% else %}Disabled{% endif %}</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <div class="font-semibold">AR Mirror</div>
+          <div class="mt-1 text-slate-600">{% if "AR_LIVE_TRYON" in enabled_features %}Enabled{% else %}Disabled{% endif %}</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <div class="font-semibold">POS Billing</div>
+          <div class="mt-1 text-slate-600">{% if "POS_BILLING" in enabled_features %}Enabled{% else %}Disabled{% endif %}</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <div class="font-semibold">Inventory</div>
+          <div class="mt-1 text-slate-600">{% if "FABRIC_STOCK" in enabled_features %}Enabled{% else %}Disabled{% endif %}</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <div class="font-semibold">WhatsApp Bot</div>
+          <div class="mt-1 text-slate-600">{% if "WHATSAPP_BOT" in enabled_features %}Enabled{% else %}Disabled{% endif %}</div>
+        </div>
+        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <div class="font-semibold">3D Try-On</div>
+          <div class="mt-1 text-slate-600">{% if "TRYON_3D_BODY_RECON" in enabled_features %}Enabled{% else %}Disabled{% endif %}</div>
+        </div>
+      </div>
+      <div class="mt-4 text-xs text-slate-500">All 48 module flags are stored under Plans/FeatureAccess.</div>
+    </div>
+
+    <div class="mt-6 card p-6">
+      <div class="text-sm uppercase tracking-wider text-slate-500">Branding & Payments</div>
+      <form method="post" action="{% url 'vendor_settings_update' %}" class="mt-4 grid md:grid-cols-3 gap-3">
+        {% csrf_token %}
+        <div class="md:col-span-2">
+          <label class="label">Business name</label>
+          {{ settings_form.business_name }}
+        </div>
+        <div>
+          <label class="label">Theme color</label>
+          {{ settings_form.theme_color }}
+        </div>
+        <div class="md:col-span-3">
+          <label class="label">UPI ID (for payment links)</label>
+          {{ settings_form.upi_id }}
+        </div>
+        <div class="md:col-span-3">
+          <button class="btn-primary" type="submit">Save Settings</button>
+        </div>
+      </form>
+      <div class="mt-3 text-xs text-slate-500">Razorpay is optional; UPI links/QR work without paid gateways.</div>
+    </div>
+  {% else %}
+    <div class="mt-6 text-slate-600">No vendor profile found for this user.</div>
+  {% endif %}
+{% endblock %}

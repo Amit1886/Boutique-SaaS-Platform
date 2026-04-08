@@ -1,0 +1,39 @@
+name: Deploy to PythonAnywhere
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger in-app deploy hook (git pull + touch wsgi)
+        env:
+          PA_WEBAPP_URL: ${{ secrets.PA_WEBAPP_URL }}
+          DEPLOY_HOOK_SECRET: ${{ secrets.DEPLOY_HOOK_SECRET }}
+        run: |
+          if [ -z "$PA_WEBAPP_URL" ]; then
+            echo "Missing secret PA_WEBAPP_URL"
+            exit 1
+          fi
+          curl -sS -X POST \
+            -H "X-Deploy-Secret: $DEPLOY_HOOK_SECRET" \
+            "$PA_WEBAPP_URL/deploy/github/"
+
+      - name: (Optional) Reload via PythonAnywhere API
+        if: ${{ secrets.PA_API_TOKEN != '' }}
+        uses: actions/checkout@v4
+      - name: Reload via API
+        if: ${{ secrets.PA_API_TOKEN != '' }}
+        env:
+          PA_USERNAME: ${{ secrets.PA_USERNAME }}
+          PA_API_TOKEN: ${{ secrets.PA_API_TOKEN }}
+          PA_WEBAPP_DOMAIN: ${{ secrets.PA_WEBAPP_DOMAIN }}
+          PA_HOST: ${{ secrets.PA_HOST }}
+        run: |
+          python -m pip install --upgrade pip requests
+          python scripts/pythonanywhere/reload_webapp.py
+        working-directory: boutique_ai_saas
+

@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Templates · Virtual Try-On{% endblock %}
+{% block content %}
+  <div class="flex flex-col lg:flex-row gap-6 items-start">
+    <div class="lg:w-1/2 w-full">
+      <h1 class="text-2xl md:text-3xl font-bold">Choose a template</h1>
+      <p class="text-slate-600 mt-2">Scroll designs horizontally. Click any design to preview on your photo with auto-fit.</p>
+
+      <div class="mt-4 card p-4">
+        <div class="text-sm font-semibold text-slate-700 mb-3">Template gallery (scroll)</div>
+        <div id="templateGallery" class="flex gap-3 overflow-x-auto pb-2">
+          {% for t in templates %}
+            <button
+              type="button"
+              class="template-thumb"
+              data-template-id="{{ t.id }}"
+              data-template-url="{{ t.image.url }}"
+              data-template-name="{{ t.name|escape }}"
+            >
+              <img src="{{ t.image.url }}" alt="{{ t.name }}" class="h-28 w-20 object-cover rounded-xl border border-slate-200" />
+              <div class="text-xs text-slate-700 mt-1 w-20 truncate">{{ t.name }}</div>
+            </button>
+          {% endfor %}
+        </div>
+      </div>
+
+      <form method="post" action="{% url 'tryon_generate' %}" class="mt-4 card p-4">
+        {% csrf_token %}
+        <input type="hidden" name="tryon_id" value="{{ tryon.id }}" />
+        <input type="hidden" name="template_id" id="selectedTemplateId" value="" />
+        <input type="hidden" name="product_id" value="{{ product_id }}" />
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <div class="text-sm text-slate-600">Selected</div>
+            <div id="selectedTemplateName" class="font-semibold">None</div>
+          </div>
+          <button type="submit" class="btn-primary">Generate Try-On</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="lg:w-1/2 w-full">
+      <div class="card p-4">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <div class="text-sm text-slate-600">Live Preview</div>
+            <div class="font-semibold">Auto-fit overlay</div>
+          </div>
+          <div class="text-xs text-slate-500">Preview runs in your browser (JS overlay).</div>
+        </div>
+
+        <div class="mt-4 tryon-stage">
+          <img id="userImage" src="{{ processed_user_url }}" alt="Your processed photo" class="tryon-base" />
+          <img id="templateOverlay" src="" alt="Template overlay" class="tryon-overlay hidden" />
+        </div>
+
+        <div class="mt-4 grid sm:grid-cols-3 gap-3 text-sm">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <div class="text-slate-500">Bust</div>
+            <div class="font-semibold">{{ tryon.bust_size }}</div>
+          </div>
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <div class="text-slate-500">Waist</div>
+            <div class="font-semibold">{{ tryon.waist_size }}</div>
+          </div>
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <div class="text-slate-500">Height</div>
+            <div class="font-semibold">{{ tryon.height }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.TRYON_CONTEXT = {
+      userImageId: "userImage",
+      overlayId: "templateOverlay",
+      templateIdInput: "selectedTemplateId",
+      templateNameEl: "selectedTemplateName",
+      galleryId: "templateGallery"
+    };
+  </script>
+{% endblock %}
+

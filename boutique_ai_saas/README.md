@@ -1,0 +1,86 @@
+# boutique_ai_saas (Django SaaS scaffold)
+
+This project is generated as an enterprise-style Boutique SaaS platform with multi-vendor routing, plans/features, try-on session flow, dashboards, POS, inventory, tailor workflow, order tracking, and a DRF + JWT API layer.
+
+## Run (Windows / PowerShell)
+
+1. Install Python 3.12+ and ensure `py` works.
+2. `cd boutique_ai_saas`
+3. `py -m venv .venv`
+4. `.\.venv\Scripts\Activate.ps1`
+5. `py -m pip install -r requirements.txt`
+6. `py manage.py migrate`
+7. `py manage.py createsuperuser`
+8. `py manage.py runserver`
+
+## Demo vendor (auto-seeded on migrate)
+
+- Username: `demo_vendor`
+- Password: `demo12345`
+- Store: `/demo/`
+
+## Fixing `Could not find platform independent libraries <prefix>`
+
+If you see that message before Django starts, clear these env vars in PowerShell before running:
+
+```powershell
+Remove-Item Env:PYTHONHOME -ErrorAction SilentlyContinue
+Remove-Item Env:PYTHONPATH -ErrorAction SilentlyContinue
+```
+
+## Key routes
+
+- `/` SaaS landing (vendors + pricing)
+- `/<vendor>/` Vendor storefront (path-based vendor routing)
+- `/<vendor>/tryon/upload/` → templates → generate → confirm order
+- `/order/track/<id>/` Tracking timeline
+- `/vendor/dashboard/`, `/tailor/dashboard/`, `/admin/dashboard/`
+- `/pos/`, `/inventory/`, `/pricing/`
+- `/api/` DRF routes, `/api/token/` JWT
+
+## PythonAnywhere (Free) deployment
+
+### Folder layout (recommended)
+
+- `~/boutique_ai_saas/static` (source)
+- `~/boutique_ai_saas/staticfiles` (collectstatic output)
+- `~/boutique_ai_saas/media` (uploads)
+- `~/boutique_ai_saas/env` (optional)
+- `~/boutique_ai_saas/logs` (optional)
+
+### First-time setup (manual)
+
+1. Create a PythonAnywhere account and a web app (Manual configuration, Python 3.12)
+2. Clone repo on PythonAnywhere:
+   - `git clone <your-github-repo> boutique_ai_saas`
+3. Create `.env` from `.env.example`:
+   - `cp .env.example .env`
+4. Run deploy script:
+   - `bash scripts/pythonanywhere/deploy.sh`
+5. On the Web tab, set WSGI file to `~/boutique_ai_saas/boutique_ai_saas/wsgi.py` (or use the default wsgi that imports it)
+
+### GitHub → PythonAnywhere auto-deploy (free-friendly)
+
+This repo includes an in-app deploy hook:
+- URL: `/deploy/github/`
+- Header required: `X-Deploy-Secret: <DEPLOY_HOOK_SECRET>`
+
+Set these GitHub repo secrets:
+- `PA_WEBAPP_URL` = `https://<yourusername>.pythonanywhere.com`
+- `DEPLOY_HOOK_SECRET` = same as in PythonAnywhere `.env`
+
+Optional (extra reload via API):
+- `PA_USERNAME`
+- `PA_API_TOKEN` (PythonAnywhere Account → API token)
+- `PA_WEBAPP_DOMAIN` = `<yourusername>.pythonanywhere.com`
+- `PA_HOST` = `www.pythonanywhere.com` (or `eu.pythonanywhere.com`)
+
+## Android (WebView) app
+
+Source: `android_webview_app/`
+
+1. Edit `android_webview_app/app/build.gradle`:
+   - Replace `BuildConfig.BASE_URL` with your PythonAnywhere URL
+2. Build locally (Android Studio) or via GitHub Actions:
+   - Workflow: `.github/workflows/android_build.yml`
+   - Artifacts: `app-debug.apk`, `app-release.apk` (release is signed with debug key for installability)

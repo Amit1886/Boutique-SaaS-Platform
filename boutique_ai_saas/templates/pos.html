@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}POS Billing{% endblock %}
+{% block content %}
+  <div class="flex items-end justify-between gap-3">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-bold">POS Billing</h1>
+      <p class="text-slate-600 mt-1">Store mode billing panel (JSON item list).</p>
+    </div>
+  </div>
+
+  <div class="mt-6 grid lg:grid-cols-2 gap-6 items-start">
+    <div class="card p-6">
+      <form method="post" class="space-y-4">
+        {% csrf_token %}
+        <div>
+          <label class="label">Customer name</label>
+          {{ form.name }}
+        </div>
+        <div>
+          <label class="label">Phone</label>
+          {{ form.phone }}
+        </div>
+        <div>
+          <label class="label">Items (JSON)</label>
+          {{ form.item_list_json }}
+          <div class="text-xs text-slate-500 mt-1">{{ form.item_list_json.help_text }}</div>
+        </div>
+        <button class="btn-primary w-full" type="submit">Save Bill</button>
+      </form>
+    </div>
+
+    <div class="card p-6">
+      <div class="text-sm uppercase tracking-wider text-slate-500">Recent bills</div>
+      <div class="mt-4 space-y-3">
+        {% for o in orders %}
+          <div class="rounded-2xl border border-slate-200 p-4">
+            <div class="font-semibold">{{ o.name }} · ₹{{ o.total }}</div>
+            <div class="text-sm text-slate-600">#{{ o.id }} · {{ o.created_at }}</div>
+          </div>
+        {% empty %}
+          <div class="text-slate-600">No POS orders yet.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+{% endblock %}
+

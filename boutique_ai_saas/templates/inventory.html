@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Fabric Inventory{% endblock %}
+{% block content %}
+  <div class="flex items-end justify-between gap-3">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-bold">Fabric Inventory</h1>
+      <p class="text-slate-600 mt-1">Stock management + usage calculator (dummy fields).</p>
+    </div>
+  </div>
+
+  <div class="mt-6 grid lg:grid-cols-2 gap-6 items-start">
+    <div class="card p-6">
+      <div class="text-sm uppercase tracking-wider text-slate-500">Add stock</div>
+      <form method="post" class="mt-4 space-y-4">
+        {% csrf_token %}
+        <div>
+          <label class="label">Fabric type</label>
+          {{ form.fabric_type }}
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="label">Meter available</label>
+            {{ form.meter_available }}
+          </div>
+          <div>
+            <label class="label">Meter used</label>
+            {{ form.meter_used }}
+          </div>
+        </div>
+        <button class="btn-primary w-full" type="submit">Save</button>
+      </form>
+    </div>
+    <div class="card p-6">
+      <div class="text-sm uppercase tracking-wider text-slate-500">Current stock</div>
+      <div class="mt-4 space-y-3">
+        {% for i in items %}
+          <form method="post" action="{% url 'inventory_update' id=i.id %}" class="rounded-2xl border border-slate-200 p-4 space-y-3">
+            {% csrf_token %}
+            <div class="font-semibold">{{ i.fabric_type }}</div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="label">Available</label>
+                <input class="input" type="number" step="0.01" name="meter_available" value="{{ i.meter_available }}" />
+              </div>
+              <div>
+                <label class="label">Used</label>
+                <input class="input" type="number" step="0.01" name="meter_used" value="{{ i.meter_used }}" />
+              </div>
+            </div>
+            <input type="hidden" name="fabric_type" value="{{ i.fabric_type }}" />
+            <button class="btn-secondary" type="submit">Update</button>
+          </form>
+        {% empty %}
+          <div class="text-slate-600">No fabric records yet.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+{% endblock %}
+

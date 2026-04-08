@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Tailor Dashboard{% endblock %}
+{% block content %}
+  <div class="flex items-end justify-between gap-3">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-bold">Tailor Dashboard</h1>
+      <p class="text-slate-600 mt-1">Daily schedule + task manager (dummy workflow).</p>
+    </div>
+  </div>
+
+  {% if tailor %}
+    <div class="mt-6 card p-6">
+      <div class="text-sm text-slate-500">Tailor</div>
+      <div class="font-semibold">{{ tailor.user.username }} · {{ tailor.vendor.business_name }}</div>
+      <div class="text-sm text-slate-600 mt-1">Speciality: {{ tailor.speciality|default:"—" }} · Capacity/day: {{ tailor.daily_capacity }}</div>
+    </div>
+
+    <div class="mt-6 card p-4 overflow-x-auto">
+      <table class="min-w-[850px] w-full text-sm">
+        <thead class="bg-slate-50 border-b border-slate-200">
+          <tr class="text-left">
+            <th class="p-3">Task</th>
+            <th class="p-3">Order</th>
+            <th class="p-3">Product</th>
+            <th class="p-3">Status</th>
+            <th class="p-3">Update</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-200">
+          {% for t in tasks %}
+            <tr class="align-top">
+              <td class="p-3 font-semibold">{{ t.task_type }}</td>
+              <td class="p-3">#{{ t.order.id }}</td>
+              <td class="p-3">{{ t.order.product.name }}</td>
+              <td class="p-3">{{ t.status }}</td>
+              <td class="p-3">
+                <form method="post" action="{% url 'tailor_task_update' %}" class="flex items-center gap-2">
+                  {% csrf_token %}
+                  <input type="hidden" name="task_id" value="{{ t.id }}" />
+                  <select name="status" class="input">
+                    {% for k, v in t._meta.get_field('status').choices %}
+                      <option value="{{ k }}" {% if t.status == k %}selected{% endif %}>{{ v }}</option>
+                    {% endfor %}
+                  </select>
+                  <button class="btn-primary text-sm" type="submit">Save</button>
+                </form>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td class="p-4 text-slate-600" colspan="5">No tasks yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+{% endblock %}
+

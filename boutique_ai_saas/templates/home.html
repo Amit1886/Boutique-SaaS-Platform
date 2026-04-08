@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Boutique AI SaaS{% endblock %}
+{% block content %}
+  <section class="rounded-3xl overflow-hidden bg-gradient-to-r from-slate-900 via-indigo-900 to-pink-700 text-white">
+    <div class="px-8 py-12 md:px-12 md:py-16 grid md:grid-cols-2 gap-10 items-center">
+      <div>
+        <h1 class="text-3xl md:text-5xl font-extrabold leading-tight">
+          Boutique AI SaaS Platform
+        </h1>
+        <p class="mt-4 text-white/90 text-lg">
+          Multi-vendor boutiques with AI try-on (2D/3D/AR placeholders), tailoring workflow, POS, inventory, subscriptions, branding, and mobile APIs.
+        </p>
+        <div class="mt-6 flex flex-col sm:flex-row gap-3">
+          <a href="{% url 'pricing' %}" class="btn-primary bg-white text-slate-900 hover:bg-white/90">View Pricing</a>
+          <a href="{% url 'signup_vendor' %}" class="btn-secondary border-white/30 text-white hover:bg-white/10">Start as Vendor</a>
+        </div>
+      </div>
+      <div class="hidden md:block">
+        <div class="rounded-2xl bg-white/10 border border-white/15 p-6">
+          <div class="text-sm uppercase tracking-wider text-white/80">48 Modules Included</div>
+          <div class="mt-4 grid grid-cols-2 gap-3 text-sm text-white/90">
+            <div class="pill">2D Try-On</div><div class="pill">AR Mirror</div>
+            <div class="pill">3D Try-On</div><div class="pill">Measurements AI</div>
+            <div class="pill">Tailor Tasks</div><div class="pill">Blueprints</div>
+            <div class="pill">Inventory</div><div class="pill">POS Billing</div>
+            <div class="pill">WhatsApp Bot</div><div class="pill">Order Tracking</div>
+          </div>
+          <div class="mt-5 text-xs text-white/70">AI/Payments are dummy hooks with TODOs for real integrations.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="mt-10">
+    <div class="flex items-end justify-between gap-4">
+      <h2 class="text-xl md:text-2xl font-bold">Explore vendor boutiques</h2>
+      <a class="text-sm text-pink-700 hover:underline" href="{% url 'pricing' %}">Subscribe →</a>
+    </div>
+    <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+      {% for v in vendors %}
+        <a href="/{{ v.subdomain }}/" class="card p-5 hover:shadow-md transition">
+          <div class="flex items-center gap-3">
+            <div class="h-10 w-10 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center font-bold" style="color: {{ v.theme_color }};">
+              {{ v.business_name|slice:":1" }}
+            </div>
+            <div>
+              <div class="font-semibold">{{ v.business_name }}</div>
+              <div class="text-sm text-slate-600">/{{ v.subdomain }}/ · {{ v.plan.name|default:"Plan" }}</div>
+            </div>
+          </div>
+          <div class="mt-4 text-sm text-slate-700">
+            Try virtual try-on and place tailoring orders.
+          </div>
+          <div class="mt-4 inline-flex items-center gap-2 text-sm font-semibold" style="color: {{ v.theme_color }};">
+            Visit store <span>→</span>
+          </div>
+        </a>
+      {% empty %}
+        <div class="text-slate-600">No vendors yet. Create one via “Become a Vendor”.</div>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}
+

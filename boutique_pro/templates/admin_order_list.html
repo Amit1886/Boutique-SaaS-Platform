@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Admin Orders{% endblock %}
+{% block content %}
+  <div class="flex items-end justify-between gap-3">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-bold">Admin Orders</h1>
+      <p class="text-slate-600 mt-1">Review user image, selected template, generated output, measurements, and update order status.</p>
+    </div>
+    <a class="btn-secondary" href="/admin/">Open Django Admin</a>
+  </div>
+
+  <div class="mt-6 overflow-x-auto card">
+    <table class="min-w-[900px] w-full text-sm">
+      <thead class="bg-slate-50 border-b border-slate-200">
+        <tr class="text-left">
+          <th class="p-3">Order</th>
+          <th class="p-3">User</th>
+          <th class="p-3">Template</th>
+          <th class="p-3">Generated</th>
+          <th class="p-3">Measurements</th>
+          <th class="p-3">Product</th>
+          <th class="p-3">Amount</th>
+          <th class="p-3">Status</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-200">
+        {% for o in orders %}
+          <tr class="align-top">
+            <td class="p-3 font-semibold">#{{ o.id }}</td>
+            <td class="p-3">
+              <img class="h-20 w-14 rounded-xl border border-slate-200 object-cover" src="{{ o.tryon_request.user_image.url }}" alt="User" />
+            </td>
+            <td class="p-3">
+              {% if o.tryon_request.selected_template %}
+                <img class="h-20 w-14 rounded-xl border border-slate-200 object-cover" src="{{ o.tryon_request.selected_template.image.url }}" alt="Template" />
+              {% else %}
+                <div class="text-slate-500">—</div>
+              {% endif %}
+            </td>
+            <td class="p-3">
+              {% if o.tryon_request.auto_generated_image %}
+                <img class="h-20 w-14 rounded-xl border border-slate-200 object-cover" src="{{ o.tryon_request.auto_generated_image.url }}" alt="Generated" />
+              {% else %}
+                <div class="text-slate-500">—</div>
+              {% endif %}
+            </td>
+            <td class="p-3 text-slate-700">
+              <div>Bust: <span class="font-semibold">{{ o.tryon_request.bust_size }}</span></div>
+              <div>Waist: <span class="font-semibold">{{ o.tryon_request.waist_size }}</span></div>
+              <div>Height: <span class="font-semibold">{{ o.tryon_request.height }}</span></div>
+              <div class="mt-1 text-xs text-slate-500">TryOn: {{ o.tryon_request.status }}</div>
+            </td>
+            <td class="p-3">{{ o.product.name }}</td>
+            <td class="p-3 font-semibold">₹{{ o.amount }}</td>
+            <td class="p-3">
+              <form method="post" class="flex items-center gap-2">
+                {% csrf_token %}
+                <input type="hidden" name="order_id" value="{{ o.id }}" />
+                <select name="status" class="input">
+                  {% for k, v in o._meta.get_field('status').choices %}
+                    <option value="{{ k }}" {% if o.status == k %}selected{% endif %}>{{ v }}</option>
+                  {% endfor %}
+                </select>
+                <button class="btn-primary text-sm" type="submit">Update</button>
+              </form>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td class="p-4 text-slate-600" colspan="8">No orders yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}
+

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Order Tools #{{ order.id }}{% endblock %}
+{% block content %}
+  <div class="flex items-end justify-between gap-3">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-bold">Order #{{ order.id }}</h1>
+      <p class="text-slate-600 mt-1">{{ order.vendor.business_name }} · {{ order.product.name }}</p>
+    </div>
+    <a class="btn-secondary" href="{% url 'admin_orders' %}">Back</a>
+  </div>
+
+  <div class="mt-6 grid lg:grid-cols-2 gap-6 items-start">
+    <div class="card p-6 space-y-4">
+      <div class="text-sm uppercase tracking-wider text-slate-500">WhatsApp</div>
+      <div class="text-sm text-slate-700">Free-friendly approach: open a prefilled message link.</div>
+      <a class="btn-primary" href="{{ whatsapp_url }}" target="_blank" rel="noopener">Send WhatsApp Update</a>
+    </div>
+    <div class="card p-6 space-y-4">
+      <div class="text-sm uppercase tracking-wider text-slate-500">Payment Link</div>
+      {% if upi_link %}
+        <div class="text-sm text-slate-700 break-all">{{ upi_link }}</div>
+        <a class="btn-secondary" href="{{ upi_link }}">Open UPI Link</a>
+        {% if qr_url %}
+          <img src="{{ qr_url }}" class="h-48 w-48 border border-slate-200 rounded-2xl" alt="UPI QR" />
+        {% endif %}
+      {% else %}
+        <div class="text-slate-600 text-sm">No UPI ID set for this vendor. Add it in VendorProfile (Django Admin) or extend vendor settings.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="mt-6">
+    <a class="navlink" href="{% url 'order_track' id=order.id %}">Open customer tracking page →</a>
+  </div>
+{% endblock %}
+

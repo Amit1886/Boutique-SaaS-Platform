@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Admin Super Dashboard{% endblock %}
+{% block content %}
+  <div class="flex items-end justify-between gap-3">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-bold">Admin Super Dashboard</h1>
+      <p class="text-slate-600 mt-1">Vendors, plans, analytics, and system overview.</p>
+    </div>
+    <a class="btn-secondary" href="/admin/">Open Django Admin</a>
+  </div>
+
+  <div class="mt-6 grid lg:grid-cols-2 gap-6 items-start">
+    <div class="card p-6">
+      <div class="text-sm uppercase tracking-wider text-slate-500">Vendors</div>
+      <div class="mt-4 space-y-3">
+        {% for v in vendors %}
+          <div class="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 p-4 bg-slate-50">
+            <div>
+              <div class="font-semibold">{{ v.business_name }}</div>
+              <div class="text-sm text-slate-600">/{{ v.subdomain }}/ · {{ v.plan.name|default:"—" }}</div>
+            </div>
+            <a class="btn-primary text-sm" href="/{{ v.subdomain }}/">Open</a>
+          </div>
+        {% empty %}
+          <div class="text-slate-600">No vendors.</div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="card p-6">
+      <div class="text-sm uppercase tracking-wider text-slate-500">Top Analytics</div>
+      <div class="mt-4 space-y-3">
+        {% for a in analytics %}
+          <div class="rounded-2xl border border-slate-200 p-4 bg-white">
+            <div class="font-semibold">{{ a.vendor.business_name }}</div>
+            <div class="text-sm text-slate-600 mt-1">Orders: {{ a.total_orders }} · Revenue: ₹{{ a.revenue }}</div>
+          </div>
+        {% empty %}
+          <div class="text-slate-600">No analytics data yet.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+{% endblock %}
+

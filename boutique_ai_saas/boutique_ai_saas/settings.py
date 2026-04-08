@@ -1,0 +1,117 @@
+import os
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv(BASE_DIR / ".env")
+
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-change-me")
+DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
+ALLOWED_HOSTS: list[str] = ["*"]
+
+INSTALLED_APPS = [
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "rest_framework",
+    "rest_framework_simplejwt",
+    "accounts.apps.AccountsConfig",
+    "vendors.apps.VendorsConfig",
+    "boutique.apps.BoutiqueConfig",
+    "tryon_ai.apps.TryonAiConfig",
+    "orders.apps.OrdersConfig",
+    "tailors.apps.TailorsConfig",
+    "inventory.apps.InventoryConfig",
+    "pos.apps.PosConfig",
+    "payments.apps.PaymentsConfig",
+    "analytics.apps.AnalyticsConfig",
+    "api.apps.ApiConfig",
+    "mobile_api.apps.MobileApiConfig",
+    "deployhook.apps.DeployhookConfig",
+]
+
+MIDDLEWARE = [
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "accounts.middleware.ProfileLanguageMiddleware",
+    "vendors.middleware.VendorRoutingMiddleware",
+]
+
+ROOT_URLCONF = "boutique_ai_saas.urls"
+
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+                "vendors.context_processors.vendor_context",
+                "accounts.context_processors.user_context",
+            ],
+        },
+    }
+]
+
+WSGI_APPLICATION = "boutique_ai_saas.wsgi.application"
+
+DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "db.sqlite3"}}
+
+AUTH_PASSWORD_VALIDATORS = [
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+]
+
+LANGUAGE_CODE = "en"
+LANGUAGES = [
+    ("en", "English"),
+    ("hi", "Hindi"),
+]
+TIME_ZONE = "Asia/Kolkata"
+USE_I18N = True
+USE_TZ = True
+
+STATIC_URL = "static/"
+STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ),
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.AllowAny",),
+}
+
+VENDOR_PATH_PREFIX_ENABLED = True
+MAIN_DOMAIN = "localhost"
+
+# External integrations (optional)
+HF_API_TOKEN = os.environ.get("HF_API_TOKEN", "")
+HF_RMBG_MODEL = os.environ.get("HF_RMBG_MODEL", "facebook/mask2former-swin-large-coco-panoptic")
+HF_TRYON_MODEL = os.environ.get("HF_TRYON_MODEL", "")
+REPLICATE_API_TOKEN = os.environ.get("REPLICATE_API_TOKEN", "")
+
+DEFAULT_UPI_ID = os.environ.get("DEFAULT_UPI_ID", "")

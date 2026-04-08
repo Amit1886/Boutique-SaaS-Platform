@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Confirm Order · {{ vendor_obj.business_name }}{% endblock %}
+{% block content %}
+  <div class="grid lg:grid-cols-2 gap-8 items-start">
+    <div>
+      <div class="text-sm text-slate-500">{{ vendor_obj.business_name }}</div>
+      <h1 class="text-2xl md:text-3xl font-bold">Confirm order</h1>
+      <p class="text-slate-600 mt-2">Review the generated try-on and pick a product/service to order.</p>
+
+      <div class="mt-5 card overflow-hidden">
+        <img src="{{ session.ai_result.url }}" alt="Try-on result" class="w-full object-contain bg-white" />
+      </div>
+    </div>
+
+    <div class="card p-6 space-y-5">
+      <div class="rounded-2xl border border-slate-200 p-4">
+        <div class="text-sm text-slate-600">Template</div>
+        <div class="font-semibold">{{ session.selected_template.name }}</div>
+      </div>
+
+      <form method="post" class="space-y-4">
+        {% csrf_token %}
+        <input type="hidden" name="session_id" value="{{ session.id }}" />
+        <div>
+          <label class="label">Select product</label>
+          <select name="product_id" class="input" required>
+            <option value="" disabled selected>Select…</option>
+            {% for p in products %}
+              <option value="{{ p.id }}">{{ p.name }} — ₹{{ p.price }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button class="btn-primary w-full" type="submit">Place Order</button>
+      </form>
+
+      <div class="text-xs text-slate-500">
+        WhatsApp/Email/SMS automation is provided as a dummy hook (TODO integrate providers).
+      </div>
+    </div>
+  </div>
+{% endblock %}
+

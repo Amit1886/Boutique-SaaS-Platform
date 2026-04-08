@@ -1,0 +1,88 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Boutique AI SaaS{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <style>
+      :root { --vendor-theme: {{ vendor_theme_color|default:"#db2777" }}; }
+    </style>
+  </head>
+  <body class="min-h-screen bg-slate-50 text-slate-900">
+    <nav class="bg-white/90 backdrop-blur border-b border-slate-200 sticky top-0 z-50">
+      <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <a href="{% url 'home' %}" class="font-extrabold tracking-tight text-lg">
+            Boutique<span class="text-[color:var(--vendor-theme)]">AI</span>
+          </a>
+          {% if current_vendor %}
+            <span class="text-xs px-2 py-1 rounded-full border border-slate-200 bg-slate-50">
+              {{ current_vendor.business_name }}
+            </span>
+          {% endif %}
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap justify-end">
+          {% if current_vendor %}
+            <a class="navlink" href="{% url 'vendor_home' vendor=current_vendor.subdomain %}">Store</a>
+            <a class="navlink" href="{% url 'product_list' vendor=current_vendor.subdomain category='saree' %}">Saree</a>
+            <a class="navlink" href="{% url 'product_list' vendor=current_vendor.subdomain category='blouse' %}">Blouse</a>
+            <a class="navlink" href="{% url 'product_list' vendor=current_vendor.subdomain category='lehenga' %}">Lehenga</a>
+            <a class="btn-primary" href="{% url 'virtual_upload' vendor=current_vendor.subdomain %}">Virtual Try-On</a>
+          {% else %}
+            <a class="navlink" href="{% url 'pricing' %}">Pricing</a>
+            <a class="navlink" href="{% url 'signup_vendor' %}">Become a Vendor</a>
+          {% endif %}
+
+          {% if user.is_authenticated %}
+            <a class="navlink" href="{% url 'customer_dashboard' %}">My</a>
+            <a class="navlink" href="{% url 'language_settings' %}">Language</a>
+            <a class="navlink" href="{% url 'vendor_dashboard' %}">Vendor</a>
+            <a class="navlink" href="{% url 'tailor_dashboard' %}">Tailor</a>
+            <a class="navlink" href="{% url 'logout' %}">Logout</a>
+          {% else %}
+            <a class="navlink" href="{% url 'login' %}">Login</a>
+          {% endif %}
+        </div>
+      </div>
+    </nav>
+
+    {% if messages %}
+      <div class="max-w-7xl mx-auto px-4 pt-4 space-y-2">
+        {% for message in messages %}
+          <div class="rounded-xl border px-4 py-3 text-sm
+                      {% if message.tags == 'success' %}border-emerald-200 bg-emerald-50 text-emerald-900{% endif %}
+                      {% if message.tags == 'error' %}border-rose-200 bg-rose-50 text-rose-900{% endif %}
+                      {% if message.tags == 'warning' %}border-amber-200 bg-amber-50 text-amber-900{% endif %}
+                      {% if message.tags == 'info' %}border-sky-200 bg-sky-50 text-sky-900{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="border-t border-slate-200 bg-white">
+      <div class="max-w-7xl mx-auto px-4 py-10 text-sm text-slate-600 flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
+        <div>© {% now "Y" %} Boutique AI SaaS. Django + DRF.</div>
+        <div class="flex gap-3 flex-wrap">
+          <a class="navlink" href="/admin/">Admin</a>
+          <a class="navlink" href="{% url 'admin_orders' %}">Admin Orders</a>
+          <a class="navlink" href="/api/">API</a>
+          <a class="navlink" href="{% url 'admin_dashboard' %}">Super Dashboard</a>
+        </div>
+      </div>
+    </footer>
+
+    <script src="{% static 'js/tryon.js' %}"></script>
+    <script src="{% static 'js/template_selector.js' %}"></script>
+    <script src="{% static 'js/measurement_ai.js' %}"></script>
+    <script src="{% static 'js/ar_tryon.js' %}"></script>
+  </body>
+</html>

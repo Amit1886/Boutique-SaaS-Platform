@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Templates · {{ vendor_obj.business_name }}{% endblock %}
+{% block content %}
+  <div class="flex flex-col lg:flex-row gap-6 items-start">
+    <div class="lg:w-1/2 w-full">
+      <div class="text-sm text-slate-500">{{ vendor_obj.business_name }}</div>
+      <h1 class="text-2xl md:text-3xl font-bold">Select a template</h1>
+      <p class="text-slate-600 mt-2">Scroll horizontally and click any template for instant overlay preview (auto-fit).</p>
+
+      <div class="mt-4 card p-4">
+        <div class="text-sm font-semibold text-slate-700 mb-3">Template scroll gallery</div>
+        <div id="templateGallery" class="flex gap-3 overflow-x-auto pb-2">
+          {% for t in templates %}
+            <button
+              type="button"
+              class="template-thumb"
+              data-template-id="{{ t.id }}"
+              data-template-url="{{ t.image.url }}"
+              data-template-name="{{ t.name|escape }}"
+            >
+              <img src="{{ t.image.url }}" alt="{{ t.name }}" class="h-28 w-20 object-cover rounded-xl border border-slate-200" />
+              <div class="text-xs text-slate-700 mt-1 w-20 truncate">{{ t.name }}</div>
+            </button>
+          {% endfor %}
+        </div>
+      </div>
+
+      <form method="post" action="{% url 'virtual_generate' vendor=vendor_obj.subdomain %}" class="mt-4 card p-4">
+        {% csrf_token %}
+        <input type="hidden" name="session_id" value="{{ session.id }}" />
+        <input type="hidden" name="template_id" id="selectedTemplateId" value="" />
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <div class="text-sm text-slate-600">Selected</div>
+            <div id="selectedTemplateName" class="font-semibold">None</div>
+          </div>
+          <button type="submit" class="btn-primary">Generate Try-On</button>
+        </div>
+      </form>
+
+      <div class="mt-4 card p-4">
+        <div class="font-semibold">AR Mirror Mode</div>
+        <div class="text-sm text-slate-600 mt-1">Start camera preview (dummy) and overlay the selected template.</div>
+        <div class="mt-3 flex gap-3">
+          <button class="btn-secondary" type="button" id="arStartBtn">Start Camera</button>
+          <button class="btn-secondary" type="button" id="arStopBtn">Stop</button>
+        </div>
+        <div class="mt-3 rounded-2xl border border-slate-200 overflow-hidden bg-black">
+          <video id="arVideo" autoplay playsinline class="w-full h-64 object-cover"></video>
+          <canvas id="arCanvas" class="hidden"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="lg:w-1/2 w-full">
+      <div class="card p-4">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <div class="text-sm text-slate-600">Live Preview</div>
+            <div class="font-semibold">Auto-fit overlay</div>
+          </div>
+          <div class="text-xs text-slate-500">Runs locally in your browser.</div>
+        </div>
+
+        <div class="mt-4 tryon-stage">
+          <img id="userImage" src="{{ session.bg_removed_image.url }}" alt="Background removed" class="tryon-base" />
+          <img id="templateOverlay" src="" alt="Template overlay" class="tryon-overlay hidden" />
+        </div>
+
+        <div class="mt-4 grid sm:grid-cols-3 gap-3 text-sm">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <div class="text-slate-500">Try-On Type</div>
+            <div class="font-semibold">{{ session.type }}</div>
+          </div>
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <div class="text-slate-500">Skin Tone</div>
+            <div class="font-semibold">{{ session.measurement_data.skin_tone.tone|default:"—" }}</div>
+          </div>
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <div class="text-slate-500">Face Shape</div>
+            <div class="font-semibold">{{ session.measurement_data.face_shape.shape|default:"—" }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.TEMPLATE_SELECTOR_CONTEXT = {
+      galleryId: "templateGallery",
+      baseImageId: "userImage",
+      overlayImageId: "templateOverlay",
+      selectedTemplateIdInput: "selectedTemplateId",
+      selectedTemplateNameEl: "selectedTemplateName",
+      ar: {
+        startBtnId: "arStartBtn",
+        stopBtnId: "arStopBtn",
+        videoId: "arVideo",
+        templateOverlayId: "templateOverlay"
+      }
+    };
+  </script>
+{% endblock %}
+

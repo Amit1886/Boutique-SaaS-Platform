@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}{{ category_label }} · {{ vendor_obj.business_name }}{% endblock %}
+{% block content %}
+  <div class="flex items-end justify-between gap-3">
+    <div>
+      <div class="text-sm text-slate-500">{{ vendor_obj.business_name }}</div>
+      <h1 class="text-2xl md:text-3xl font-bold">{{ category_label }}</h1>
+    </div>
+    <a class="btn-primary" href="{% url 'virtual_upload' vendor=vendor_obj.subdomain %}">Virtual Try-On</a>
+  </div>
+
+  <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+    {% for p in products %}
+      <div class="card">
+        <img src="{{ p.image.url }}" alt="{{ p.name }}" class="h-44 w-full object-cover" />
+        <div class="p-4">
+          <div class="font-semibold">{{ p.name }}</div>
+          <p class="text-sm text-slate-600 mt-1 line-clamp-2">{{ p.description }}</p>
+          <div class="mt-3 flex items-center justify-between">
+            <div class="font-bold">₹{{ p.price }}</div>
+            <a class="btn-primary text-sm" href="{% url 'virtual_upload' vendor=vendor_obj.subdomain %}">Try On</a>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="text-slate-600">No products found.</div>
+    {% endfor %}
+  </div>
+{% endblock %}
+
