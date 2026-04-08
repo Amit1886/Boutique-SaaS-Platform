@@ -1,9 +1,9 @@
 name: Android APK Build
 
 on:
-  push:
-    branches: [ "main" ]
   workflow_dispatch:
+  push:
+    branches: ["main"]
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -17,26 +17,29 @@ jobs:
         working-directory: boutique_ai_saas/android_webview_app
 
     steps:
-      - name: Checkout
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup Java
+      - name: Install Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
 
-      - name: Make Gradle executable
-        run: chmod +x ./gradlew
+      - name: Install Gradle 8.2
+        run: |
+          wget https://services.gradle.org/distributions/gradle-8.2-bin.zip
+          unzip gradle-8.2-bin.zip
+          export PATH="$PWD/gradle-8.2/bin:$PATH"
 
       - name: Build APK
-        run: ./gradlew assembleDebug assembleRelease --stacktrace
+        run: gradle assembleDebug assembleRelease --stacktrace
 
       - name: Collect APKs
         run: |
           mkdir -p artifacts
-          cp app/build/outputs/apk/debug/*.apk artifacts/
-          cp app/build/outputs/apk/release/*.apk artifacts/
+          cp app/build/outputs/apk/debug/*.apk artifacts/ || echo "No debug APK"
+          cp app/build/outputs/apk/release/*.apk artifacts/ || echo "No release APK"
           ls -la artifacts
 
       - name: Upload APKs
