@@ -24,7 +24,7 @@ jobs:
           java-version: 17
 
       - name: Give permission to gradlew
-        run: chmod +x boutique_ai_saas/android_webview_app/gradlew
+        run: chmod +x ./boutique_ai_saas/android_webview_app/gradlew
 
       - name: Build Debug APK
         working-directory: boutique_ai_saas/android_webview_app
