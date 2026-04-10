@@ -23,8 +23,10 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Fix gradlew permissions
-        run: chmod +x boutique_ai_saas/android_webview_app/gradlew
+      - name: Fix gradle wrapper permissions
+        run: |
+          chmod +x boutique_ai_saas/android_webview_app/gradlew
+          chmod 644 boutique_ai_saas/android_webview_app/gradle/wrapper/gradle-wrapper.jar
       - name: Build Debug APK
         working-directory: boutique_ai_saas/android_webview_app
         run: ./gradlew assembleDebug --stacktrace
