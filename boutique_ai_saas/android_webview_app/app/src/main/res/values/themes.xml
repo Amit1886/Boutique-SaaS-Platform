@@ -1,4 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+
     <style name="Theme.BoutiqueAISaaS.Main" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">#DB2777</item>
         <item name="colorPrimaryVariant">#BE185D</item>
@@ -7,10 +8,13 @@
     </style>
 
     <style name="Theme.BoutiqueAISaaS" parent="Theme.BoutiqueAISaaS.Main">
-        <!-- Android 12+ splash screen -->
+        <!-- Android 12+ splash screen (safe) -->
         <item name="android:windowSplashScreenBackground" tools:targetApi="s">#0F172A</item>
         <item name="android:windowSplashScreenAnimatedIcon" tools:targetApi="s">@drawable/ic_launcher_foreground</item>
         <item name="android:windowSplashScreenAnimationDuration" tools:targetApi="s">300</item>
-        <item name="android:postSplashScreenTheme" tools:targetApi="s">@style/Theme.BoutiqueAISaaS.Main</item>
+
+        <!-- ❌ Removed (this was causing error) -->
+        <!-- <item name="android:postSplashScreenTheme">@style/Theme.BoutiqueAISaaS.Main</item> -->
     </style>
+
 </resources>
