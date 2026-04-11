@@ -18,10 +18,13 @@ android {
     }
 
     buildTypes {
-        debug {
-            debuggable true
-            signingConfig signingConfigs.debug
-        }
+    debug {
+        debuggable true
+    }
+    release {
+        minifyEnabled false
+    }
+}
         release {
             minifyEnabled false
             signingConfig signingConfigs.debug
