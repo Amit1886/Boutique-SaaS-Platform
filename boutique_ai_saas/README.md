@@ -67,7 +67,10 @@ Set these in `~/boutique_ai_saas/.env` (copy from `.env.example`):
    - `cp .env.example .env`
 4. Run deploy script:
    - `bash scripts/pythonanywhere/deploy.sh`
-5. On the Web tab, set WSGI file to `~/boutique_ai_saas/boutique_ai_saas/wsgi.py` (or use the default wsgi that imports it)
+5. On the Web tab, open the **WSGI configuration file** and point it to your project folder, then import the Django app (typical setup):
+   - Add your project path: `/home/<yourusername>/boutique_ai_saas`
+   - Set `DJANGO_SETTINGS_MODULE` to `boutique_ai_saas.settings`
+   - Import `application` from `boutique_ai_saas.wsgi`
 6. On the Web tab, add Static files mappings:
    - URL: `/static/` -> Directory: `/home/<yourusername>/boutique_ai_saas/staticfiles`
    - URL: `/media/` -> Directory: `/home/<yourusername>/boutique_ai_saas/media`
