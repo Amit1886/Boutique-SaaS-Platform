@@ -48,6 +48,16 @@ Remove-Item Env:PYTHONPATH -ErrorAction SilentlyContinue
 - `~/boutique_ai_saas/env` (optional)
 - `~/boutique_ai_saas/logs` (optional)
 
+### Production `.env` values (important)
+
+Set these in `~/boutique_ai_saas/.env` (copy from `.env.example`):
+
+- `DJANGO_DEBUG=0`
+- `DJANGO_SECRET_KEY=<long-random-secret>`
+- `DJANGO_ALLOWED_HOSTS=<yourusername>.pythonanywhere.com`
+- `DJANGO_CSRF_TRUSTED_ORIGINS=https://<yourusername>.pythonanywhere.com`
+- `MAIN_DOMAIN=<yourusername>.pythonanywhere.com` (optional; only needed for subdomain routing)
+
 ### First-time setup (manual)
 
 1. Create a PythonAnywhere account and a web app (Manual configuration, Python 3.12)
@@ -58,6 +68,9 @@ Remove-Item Env:PYTHONPATH -ErrorAction SilentlyContinue
 4. Run deploy script:
    - `bash scripts/pythonanywhere/deploy.sh`
 5. On the Web tab, set WSGI file to `~/boutique_ai_saas/boutique_ai_saas/wsgi.py` (or use the default wsgi that imports it)
+6. On the Web tab, add Static files mappings:
+   - URL: `/static/` -> Directory: `/home/<yourusername>/boutique_ai_saas/staticfiles`
+   - URL: `/media/` -> Directory: `/home/<yourusername>/boutique_ai_saas/media`
 
 ### GitHub → PythonAnywhere auto-deploy (free-friendly)
 

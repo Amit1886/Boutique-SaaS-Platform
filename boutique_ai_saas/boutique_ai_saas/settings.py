@@ -7,9 +7,24 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv(BASE_DIR / ".env")
 
+
+def _env_list(name: str, default: list[str]) -> list[str]:
+    value = (os.environ.get(name) or "").strip()
+    if not value:
+        return default
+    # Comma-separated values (optionally with semicolons).
+    parts = []
+    for part in value.replace(";", ",").split(","):
+        cleaned = part.strip()
+        if cleaned:
+            parts.append(cleaned)
+    return parts or default
+
+
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-change-me")
 DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
-ALLOWED_HOSTS: list[str] = ["*"]
+ALLOWED_HOSTS: list[str] = _env_list("DJANGO_ALLOWED_HOSTS", ["localhost", "127.0.0.1", "[::1]"])
+CSRF_TRUSTED_ORIGINS: list[str] = _env_list("DJANGO_CSRF_TRUSTED_ORIGINS", [])
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -106,7 +121,7 @@ REST_FRAMEWORK = {
 }
 
 VENDOR_PATH_PREFIX_ENABLED = True
-MAIN_DOMAIN = "localhost"
+MAIN_DOMAIN = os.environ.get("MAIN_DOMAIN", "localhost")
 
 # External integrations (optional)
 HF_API_TOKEN = os.environ.get("HF_API_TOKEN", "")
@@ -115,3 +130,13 @@ HF_TRYON_MODEL = os.environ.get("HF_TRYON_MODEL", "")
 REPLICATE_API_TOKEN = os.environ.get("REPLICATE_API_TOKEN", "")
 
 DEFAULT_UPI_ID = os.environ.get("DEFAULT_UPI_ID", "")
+
+# Production hardening (safe defaults; tune via env vars)
+if not DEBUG:
+    # PythonAnywhere and most reverse proxies set X-Forwarded-Proto.
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = os.environ.get("DJANGO_SECURE_SSL_REDIRECT", "1") == "1"
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_REFERRER_POLICY = "same-origin"
