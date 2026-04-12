@@ -1,8 +1,8 @@
 from rest_framework import serializers
 
-from boutique.models import Product, TemplateDesign
+from boutique.models import Favorite, Product, TemplateDesign
 from orders.models import Order
-from tryon_ai.models import TryOnSession
+from tryon_ai.models import BlouseDesign, TryOnSession
 from vendors.models import Plan, VendorProfile
 
 
@@ -75,3 +75,16 @@ class OrderSerializer(serializers.ModelSerializer):
             "created_at",
         ]
 
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    template = TemplateDesignSerializer(read_only=True)
+
+    class Meta:
+        model = Favorite
+        fields = ["id", "vendor", "template", "created_at"]
+
+
+class BlouseDesignSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BlouseDesign
+        fields = ["id", "vendor", "user", "options", "image", "created_at"]

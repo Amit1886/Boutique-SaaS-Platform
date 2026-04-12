@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 
-from .models import Product, SavedLook, TemplateDesign
+from .models import Favorite, Product, SavedLook, TemplateDesign
 
 
 @admin.register(Product)
@@ -44,3 +44,9 @@ class SavedLookAdmin(admin.ModelAdmin):
     list_filter = ("vendor", "created_at")
     search_fields = ("user__username", "title", "vendor__subdomain")
 
+
+@admin.register(Favorite)
+class FavoriteAdmin(admin.ModelAdmin):
+    list_display = ("id", "user", "vendor", "template", "created_at")
+    list_filter = ("vendor", "created_at")
+    search_fields = ("user__username", "vendor__subdomain", "template__name")

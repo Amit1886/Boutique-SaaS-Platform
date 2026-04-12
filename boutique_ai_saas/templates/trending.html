@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Trending{% endblock %}
+{% block content %}
+  <div class="flex items-end justify-between gap-3">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-bold">Trending</h1>
+      <p class="text-slate-600 mt-1">Most used templates (try-on events).</p>
+    </div>
+    <a class="btn-secondary" href="{% url 'favorites' %}">Favorites</a>
+  </div>
+
+  <div class="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
+    {% for row in rows %}
+      {% with t=row.template %}
+        <a href="/{{ t.vendor.subdomain }}/" class="card p-3 hover:shadow-md transition">
+          <img src="{{ t.image.url }}" alt="{{ t.name }}" class="w-full h-40 object-cover rounded-xl border border-slate-200" />
+          <div class="mt-2 flex items-center justify-between gap-3">
+            <div class="text-sm font-semibold truncate">{{ t.name }}</div>
+            <div class="text-xs text-slate-600">{{ row.uses }} uses</div>
+          </div>
+          <div class="text-xs text-slate-600">/{{ t.vendor.subdomain }}/</div>
+        </a>
+      {% endwith %}
+    {% empty %}
+      <div class="text-slate-600">No trending data yet. Generate some try-ons.</div>
+    {% endfor %}
+  </div>
+{% endblock %}
+

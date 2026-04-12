@@ -10,15 +10,25 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 
+from analytics.models import TemplateUsageEvent
 from boutique.models import Product, TemplateDesign
 from boutique.models import SavedLook
 from orders.models import Order, TrackingStage
 from vendors.models import VendorProfile
 
 from .ai import ai_face_shape, ai_measurement_extract, ai_skin_tone, generate_3d_body
-from .forms import OrderConfirmForm, VirtualUploadForm
-from .models import TryOnSession, TryOnType
-from .services import generate_tryon, log_task, remove_background
+from .forms import BlouseDesignerForm, BlueprintForm, OrderConfirmForm, VideoTryOnForm, VirtualUploadForm
+from .models import BlouseDesign, CuttingBlueprint, TryOnSession, TryOnType, VideoTryOnJob
+from .services import (
+    ai_fitting_recommend,
+    change_background,
+    generate_blouse_design,
+    generate_cutting_pdf,
+    generate_tryon_image,
+    generate_video_tryon,
+    log_task,
+    remove_background,
+)
 
 
 def _save_relative(media_root: Path, abs_path: Path) -> str:
@@ -96,9 +106,17 @@ def virtual_generate(request: HttpRequest, vendor: str) -> HttpResponse:
         session.type = TryOnType.THREE_D
 
     out_img = Path(settings.MEDIA_ROOT) / "tryon" / "result" / f"tryon_{session.pk}.png"
-    generate_tryon(Path(session.bg_removed_image.path), Path(template.image.path), out_img, session=session)
+    generate_tryon_image(Path(session.bg_removed_image.path), Path(template.image.path), out_img, session=session)
     session.ai_result.name = _save_relative(Path(settings.MEDIA_ROOT), out_img)
     session.save(update_fields=["selected_template", "ai_result", "type"])
+
+    TemplateUsageEvent.objects.create(
+        vendor=vendor_obj,
+        template=template,
+        user_id=request.user.id if request.user.is_authenticated else None,
+        event_type=TemplateUsageEvent.EventType.TRYON,
+        meta={"session_id": session.pk, "source": "virtual_generate"},
+    )
 
     return render(request, "virtual_result.html", {"vendor_obj": vendor_obj, "session": session})
 
@@ -156,6 +174,133 @@ def measurement_api(request: HttpRequest) -> JsonResponse:
             f.write(chunk)
     data = ai_measurement_extract(temp_path)
     return JsonResponse({"ok": True, "data": data})
+
+
+@require_http_methods(["POST"])
+def tryon_preview_api(request: HttpRequest, vendor: str) -> JsonResponse:
+    """
+    AJAX: generate try-on preview without full page reload.
+    Expects: session_id, template_id
+    """
+    vendor_obj = get_object_or_404(VendorProfile, subdomain=vendor)
+    session_id = request.POST.get("session_id")
+    template_id = request.POST.get("template_id")
+    if not session_id or not template_id:
+        return JsonResponse({"ok": False, "error": "session_id and template_id required"}, status=400)
+
+    session = get_object_or_404(TryOnSession, pk=session_id, vendor=vendor_obj)
+    template = get_object_or_404(TemplateDesign, pk=template_id, vendor=vendor_obj)
+
+    out_img = Path(settings.MEDIA_ROOT) / "tryon" / "result" / f"preview_{session.pk}_{template.pk}.png"
+    generate_tryon_image(Path(session.bg_removed_image.path), Path(template.image.path), out_img, session=session)
+    session.selected_template = template
+    session.ai_result.name = _save_relative(Path(settings.MEDIA_ROOT), out_img)
+    session.save(update_fields=["selected_template", "ai_result"])
+
+    TemplateUsageEvent.objects.create(
+        vendor=vendor_obj,
+        template=template,
+        user_id=request.user.id if request.user.is_authenticated else None,
+        event_type=TemplateUsageEvent.EventType.TRYON,
+        meta={"session_id": session.pk, "source": "preview"},
+    )
+
+    rec = ai_fitting_recommend((session.measurement_data or {}).get("measurements", {}), session=session)
+    return JsonResponse({"ok": True, "result_url": session.ai_result.url, "fitting": rec})
+
+
+@require_http_methods(["GET", "POST"])
+def tryon_video(request: HttpRequest, vendor: str) -> HttpResponse:
+    vendor_obj = get_object_or_404(VendorProfile, subdomain=vendor)
+    templates = TemplateDesign.objects.filter(vendor=vendor_obj).order_by("-default_flag", "-id")[:30]
+    job = None
+    if request.method == "POST":
+        form = VideoTryOnForm(request.POST, request.FILES)
+        if form.is_valid():
+            template = None
+            if form.cleaned_data.get("template_id"):
+                template = TemplateDesign.objects.filter(pk=form.cleaned_data["template_id"], vendor=vendor_obj).first()
+            job = VideoTryOnJob.objects.create(
+                vendor=vendor_obj,
+                user=request.user if request.user.is_authenticated else None,
+                input_video=form.cleaned_data["video"],
+                template=template,
+                status=VideoTryOnJob.Status.PROCESSING,
+                meta={"note": "5s video placeholder pipeline"},
+            )
+            out = Path(settings.MEDIA_ROOT) / "tryon" / "video" / "output" / f"tryon_video_{job.pk}.mp4"
+            generate_video_tryon(Path(job.input_video.path), out, session=None)
+            job.output_video.name = _save_relative(Path(settings.MEDIA_ROOT), out)
+            job.status = VideoTryOnJob.Status.SUCCEEDED
+            job.save(update_fields=["output_video", "status"])
+            messages.success(request, "Video try-on generated (placeholder).")
+    else:
+        form = VideoTryOnForm()
+    return render(request, "tryon_video.html", {"vendor_obj": vendor_obj, "form": form, "templates": templates, "job": job})
+
+
+@require_http_methods(["GET", "POST"])
+def blouse_designer(request: HttpRequest, vendor: str) -> HttpResponse:
+    vendor_obj = get_object_or_404(VendorProfile, subdomain=vendor)
+    design = None
+    if request.method == "POST":
+        form = BlouseDesignerForm(request.POST)
+        if form.is_valid():
+            design = BlouseDesign.objects.create(
+                vendor=vendor_obj,
+                user=request.user if request.user.is_authenticated else None,
+                options=form.cleaned_data,
+            )
+            out = Path(settings.MEDIA_ROOT) / "blouse" / "designs" / f"blouse_{design.pk}.png"
+            generate_blouse_design(form.cleaned_data, out, session=None)
+            design.image.name = _save_relative(Path(settings.MEDIA_ROOT), out)
+            design.save(update_fields=["image"])
+            messages.success(request, "Blouse design generated.")
+    else:
+        form = BlouseDesignerForm()
+    recent = BlouseDesign.objects.filter(vendor=vendor_obj).order_by("-id")[:30]
+    return render(request, "blouse_designer.html", {"vendor_obj": vendor_obj, "form": form, "design": design, "recent": recent})
+
+
+@require_http_methods(["GET", "POST"])
+def cutting_pdf(request: HttpRequest, vendor: str) -> HttpResponse:
+    vendor_obj = get_object_or_404(VendorProfile, subdomain=vendor)
+    if request.method == "POST":
+        form = BlueprintForm(request.POST)
+        if form.is_valid():
+            measurements = {k: float(v) for k, v in form.cleaned_data.items() if v is not None}
+            obj = CuttingBlueprint.objects.create(
+                vendor=vendor_obj,
+                user=request.user if request.user.is_authenticated else None,
+                measurements=measurements,
+            )
+            out = Path(settings.MEDIA_ROOT) / "blueprints" / f"cutting_{obj.pk}.pdf"
+            generate_cutting_pdf(measurements, out, session=None)
+            obj.pdf.name = _save_relative(Path(settings.MEDIA_ROOT), out)
+            obj.save(update_fields=["pdf"])
+            return redirect(obj.pdf.url)
+    else:
+        form = BlueprintForm()
+    return render(request, "cutting_pdf.html", {"vendor_obj": vendor_obj, "form": form})
+
+
+@require_http_methods(["POST"])
+def background_change_api(request: HttpRequest, vendor: str) -> JsonResponse:
+    vendor_obj = get_object_or_404(VendorProfile, subdomain=vendor)
+    session_id = request.POST.get("session_id")
+    background = (request.POST.get("background") or "studio").strip().lower()
+    if not session_id:
+        return JsonResponse({"ok": False, "error": "session_id required"}, status=400)
+    if background not in {"wedding", "party", "studio"}:
+        background = "studio"
+
+    session = get_object_or_404(TryOnSession, pk=session_id, vendor=vendor_obj)
+    base_path = Path(session.bg_removed_image.path) if session.bg_removed_image else Path(session.original_image.path)
+    out_img = Path(settings.MEDIA_ROOT) / "tryon" / "result" / f"bg_{background}_{session.pk}.png"
+    change_background(base_path, out_img, background=background, session=session)
+    session.ai_result.name = _save_relative(Path(settings.MEDIA_ROOT), out_img)
+    session.save(update_fields=["ai_result"])
+    return JsonResponse({"ok": True, "result_url": session.ai_result.url})
 
 
 @login_required

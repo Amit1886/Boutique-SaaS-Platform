@@ -1,0 +1,33 @@
+name: Auto Push (Manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      message:
+        description: "Commit message"
+        required: false
+        default: "auto update"
+
+jobs:
+  auto_push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Commit and push if needed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "${{ inputs.message }}"
+          git push origin HEAD:main
+

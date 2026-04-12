@@ -8,6 +8,9 @@ from boutique import views as boutique_views
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", boutique_views.home, name="home"),
+    path("trending/", boutique_views.trending, name="trending"),
+    path("favorites/", boutique_views.favorites, name="favorites"),
+    path("favorites/toggle/", boutique_views.toggle_favorite, name="toggle_favorite"),
     path("pricing/", include("vendors.urls_pricing")),
     path("accounts/", include("accounts.urls")),
     path("vendor/", include("vendors.urls_dashboard")),
@@ -20,6 +23,7 @@ urlpatterns = [
     path("api/", include("api.urls")),
     path("mobile_api/", include("mobile_api.urls")),
     path("deploy/", include("deployhook.urls")),
+    path("whatsapp/", include("whatsapp_bot.urls")),
     path("<slug:vendor>/", include("boutique.urls_vendor")),
 ]
 

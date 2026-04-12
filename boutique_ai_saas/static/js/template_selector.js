@@ -19,6 +19,8 @@
       overlayImg.src = url;
       selectedId.value = id;
       selectedName.textContent = name || "Selected";
+      const fav = document.getElementById("favoriteTemplateId");
+      if (fav) fav.value = id;
       overlayImg.onload = () => window.BOUTIQUE_AI.fitOverlayToBase(baseImg, overlayImg);
       window.BOUTIQUE_AI.fitOverlayToBase(baseImg, overlayImg);
 
@@ -38,4 +40,3 @@
 
   document.addEventListener("DOMContentLoaded", init);
 })();
-

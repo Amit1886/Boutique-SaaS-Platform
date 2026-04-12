@@ -60,5 +60,45 @@
       {% endfor %}
     </div>
   </section>
-{% endblock %}
 
+  {% if personal_feed %}
+    <section class="mt-10">
+      <div class="flex items-end justify-between gap-4">
+        <h2 class="text-xl md:text-2xl font-bold">For you</h2>
+        <a class="text-sm text-pink-700 hover:underline" href="{% url 'favorites' %}">Favorites →</a>
+      </div>
+      <div class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {% for t in personal_feed %}
+          <a href="/{{ t.vendor.subdomain }}/" class="card p-3 hover:shadow-md transition">
+            <img src="{{ t.image.url }}" alt="{{ t.name }}" class="w-full h-36 object-cover rounded-xl border border-slate-200" />
+            <div class="mt-2 text-sm font-semibold truncate">{{ t.name }}</div>
+            <div class="text-xs text-slate-600">/{{ t.vendor.subdomain }}/</div>
+          </a>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  {% if trending %}
+    <section class="mt-10">
+      <div class="flex items-end justify-between gap-4">
+        <h2 class="text-xl md:text-2xl font-bold">Trending designs</h2>
+        <a class="text-sm text-pink-700 hover:underline" href="{% url 'trending' %}">See all →</a>
+      </div>
+      <div class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {% for row in trending %}
+          {% with t=row.template %}
+            <a href="/{{ t.vendor.subdomain }}/" class="card p-3 hover:shadow-md transition">
+              <img src="{{ t.image.url }}" alt="{{ t.name }}" class="w-full h-36 object-cover rounded-xl border border-slate-200" />
+              <div class="mt-2 flex items-center justify-between gap-3">
+                <div class="text-sm font-semibold truncate">{{ t.name }}</div>
+                <div class="text-xs text-slate-600">{{ row.uses }} uses</div>
+              </div>
+              <div class="text-xs text-slate-600">/{{ t.vendor.subdomain }}/</div>
+            </a>
+          {% endwith %}
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+{% endblock %}

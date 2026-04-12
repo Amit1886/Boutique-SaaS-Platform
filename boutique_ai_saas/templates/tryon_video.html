@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Video Try-On · {{ vendor_obj.business_name }}{% endblock %}
+{% block content %}
+  <div class="flex items-end justify-between gap-3">
+    <div>
+      <div class="text-sm text-slate-500">{{ vendor_obj.business_name }}</div>
+      <h1 class="text-2xl md:text-3xl font-bold">Video Try-On</h1>
+      <p class="text-slate-600 mt-1">Upload a ~5 sec video. Output is a placeholder copy for now (pipeline ready).</p>
+    </div>
+    <a class="btn-secondary" href="/{{ vendor_obj.subdomain }}/">Back to store</a>
+  </div>
+
+  <div class="mt-6 grid lg:grid-cols-2 gap-6 items-start">
+    <div class="card p-6">
+      <form method="post" enctype="multipart/form-data" class="space-y-4">
+        {% csrf_token %}
+        <div>
+          <div class="text-sm font-semibold mb-1">Upload video</div>
+          {{ form.video }}
+        </div>
+        <div>
+          <div class="text-sm font-semibold mb-1">Template (optional)</div>
+          <select name="template_id" class="input w-full">
+            <option value="">-- None --</option>
+            {% for t in templates %}
+              <option value="{{ t.id }}">{{ t.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button class="btn-primary" type="submit">Generate Video Try-On</button>
+      </form>
+    </div>
+
+    <div class="card p-6">
+      <div class="text-sm uppercase tracking-wider text-slate-500">Result</div>
+      {% if job and job.output_video %}
+        <div class="mt-4 rounded-2xl border border-slate-200 overflow-hidden bg-black">
+          <video controls class="w-full">
+            <source src="{{ job.output_video.url }}" type="video/mp4" />
+          </video>
+        </div>
+        <div class="mt-3 text-sm text-slate-600">Job #{{ job.id }} · {{ job.status }}</div>
+      {% else %}
+        <div class="mt-4 text-slate-600">Upload a video to generate a placeholder output.</div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
+

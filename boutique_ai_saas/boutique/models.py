@@ -49,3 +49,19 @@ class SavedLook(models.Model):
     def __str__(self) -> str:
         return f"{self.user.username} - {self.title}"
 
+
+class Favorite(models.Model):
+    """
+    Favorites for templates (extendable later to products/looks).
+    """
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="favorites")
+    vendor = models.ForeignKey(VendorProfile, on_delete=models.CASCADE, related_name="favorites")
+    template = models.ForeignKey(TemplateDesign, on_delete=models.CASCADE, related_name="favorited_by")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = [("user", "template")]
+
+    def __str__(self) -> str:
+        return f"{self.user_id}:{self.template_id}"

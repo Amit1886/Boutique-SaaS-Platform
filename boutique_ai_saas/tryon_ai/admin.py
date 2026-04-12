@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 
-from .models import AITaskHistory, TryOnSession
+from .models import AITaskHistory, BlouseDesign, BodyModel3D, CuttingBlueprint, TryOnSession, VideoTryOnJob
 
 
 @admin.register(TryOnSession)
@@ -38,3 +38,31 @@ class AITaskHistoryAdmin(admin.ModelAdmin):
     list_display = ("id", "session", "provider", "task_type", "status", "duration_ms", "created_at")
     list_filter = ("provider", "task_type", "status", "created_at")
     search_fields = ("id", "session__id", "task_type", "provider")
+
+
+@admin.register(VideoTryOnJob)
+class VideoTryOnJobAdmin(admin.ModelAdmin):
+    list_display = ("id", "vendor", "user", "status", "created_at")
+    list_filter = ("vendor", "status", "created_at")
+    search_fields = ("id", "vendor__subdomain", "user__username")
+
+
+@admin.register(BodyModel3D)
+class BodyModel3DAdmin(admin.ModelAdmin):
+    list_display = ("id", "vendor", "user", "status", "created_at")
+    list_filter = ("vendor", "status", "created_at")
+    search_fields = ("id", "vendor__subdomain", "user__username")
+
+
+@admin.register(BlouseDesign)
+class BlouseDesignAdmin(admin.ModelAdmin):
+    list_display = ("id", "vendor", "user", "created_at")
+    list_filter = ("vendor", "created_at")
+    search_fields = ("id", "vendor__subdomain", "user__username")
+
+
+@admin.register(CuttingBlueprint)
+class CuttingBlueprintAdmin(admin.ModelAdmin):
+    list_display = ("id", "vendor", "user", "created_at")
+    list_filter = ("vendor", "created_at")
+    search_fields = ("id", "vendor__subdomain", "user__username")

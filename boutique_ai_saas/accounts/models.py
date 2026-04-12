@@ -14,9 +14,17 @@ class UserProfile(models.Model):
     role = models.CharField(max_length=20, choices=UserRole.choices, default=UserRole.CUSTOMER)
     phone = models.CharField(max_length=30, blank=True)
     profile_img = models.ImageField(upload_to="profiles/", null=True, blank=True)
-    language = models.CharField(max_length=5, default="en")
+    language = models.CharField(
+        max_length=5,
+        default="en",
+        choices=[
+            ("en", "English"),
+            ("hi", "Hindi"),
+            ("ta", "Tamil"),
+            ("gu", "Gujarati"),
+        ],
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
         return f"{self.user.username} ({self.role})"
-

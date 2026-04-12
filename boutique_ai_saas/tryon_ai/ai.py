@@ -53,9 +53,21 @@ def generate_2d_tryon(bg_removed_path: Path, template_path: Path, out_path: Path
     return out_path
 
 
+def generate_3d_body_model(img_path: Path) -> dict[str, Any]:
+    """
+    Placeholder 3D body reconstruction output (structure ready).
+
+    Replace with SMPL / PIFuHD / your API and return:
+    - mesh path/url
+    - keypoints
+    - body measurements
+    """
+    return {"status": "ok", "mesh": None, "keypoints": None, "note": "Dummy 3D body reconstruction output"}
+
+
+# Backwards-compatible alias used by existing views.
 def generate_3d_body(img_path: Path) -> dict[str, Any]:
-    # TODO: integrate SMPL/PIFuHD; return mesh URL/path + keypoints.
-    return {"status": "ok", "mesh": None, "note": "Dummy 3D body reconstruction output"}
+    return generate_3d_body_model(img_path)
 
 
 def simulate_fabric_drape(img_path: Path, template_path: Path) -> dict[str, Any]:
@@ -72,6 +84,43 @@ def ai_measurement_extract(img_path: Path) -> dict[str, Any]:
         "height_in": 62.0,
         "confidence": 0.35,
         "note": "Dummy AI measurement extraction",
+    }
+
+
+def ai_measurement_detect(img_path: Path) -> dict[str, Any]:
+    """
+    Required API: auto detect bust/waist/shoulder/hips (dummy).
+    """
+    data = ai_measurement_extract(img_path)
+    data.setdefault("shoulder_in", 15.0)
+    data.setdefault("hips_in", data.get("hip_in", 36.0))
+    return data
+
+
+def ai_fitting_recommend(measurements: dict[str, Any]) -> dict[str, Any]:
+    """
+    Required API: fitting suggestions (dummy but deterministic).
+    """
+    bust = float(measurements.get("bust_in") or 34.0)
+    waist = float(measurements.get("waist_in") or 28.0)
+    shoulder = float(measurements.get("shoulder_in") or 15.0)
+
+    if bust >= 38:
+        neck = "sweetheart"
+    elif bust >= 35:
+        neck = "v-neck"
+    else:
+        neck = "round"
+
+    sleeve = "cap" if shoulder <= 14.5 else "short"
+    back = "u-back" if waist <= 30 else "deep-back"
+
+    return {
+        "neck_design": neck,
+        "sleeve_type": sleeve,
+        "back_design": back,
+        "confidence": 0.42,
+        "note": "Dummy fitting recommendation (replace with AI model/rules)",
     }
 
 
@@ -97,8 +146,41 @@ def color_swapper(template_path: Path, hex_color: str, out_path: Path) -> Path:
 
 
 def generate_blouse_design(options: dict[str, Any]) -> dict[str, Any]:
-    # TODO: integrate generative model for blouse design; return assets / prompt output.
+    """
+    Required API: generate blouse design image (placeholder).
+    Returns metadata; use `generate_blouse_design_image` for the actual image file.
+    """
     return {"status": "ok", "design": options, "note": "Dummy blouse designer output"}
+
+
+def generate_blouse_design_image(options: dict[str, Any], out_path: Path) -> Path:
+    """
+    Create a simple PNG design mockup so the flow works end-to-end.
+    """
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    img = Image.new("RGB", (1024, 768), (255, 255, 255))
+    d = ImageDraw.Draw(img)
+    d.rectangle([40, 40, 984, 728], outline=(15, 23, 42), width=4)
+    d.text((70, 70), "Blouse Designer (AI Placeholder)", fill=(15, 23, 42))
+
+    neck = str(options.get("neck") or options.get("neck_design") or "round")
+    sleeve = str(options.get("sleeve") or options.get("sleeve_type") or "short")
+    back = str(options.get("back") or options.get("back_design") or "u-back")
+    pattern = str(options.get("pattern") or "solid")
+    color = str(options.get("color") or "#db2777")
+
+    y = 130
+    for label, value in [("Neck", neck), ("Sleeve", sleeve), ("Back", back), ("Pattern", pattern), ("Color", color)]:
+        d.text((70, y), f"{label}: {value}", fill=(51, 65, 85))
+        y += 34
+
+    # Minimal visual "mock" neckline/sleeve/back shapes
+    d.ellipse([420, 190, 620, 390], outline=(219, 39, 119), width=6)
+    d.rectangle([360, 390, 680, 620], outline=(219, 39, 119), width=6)
+    d.text((430, 630), "Mock preview", fill=(51, 65, 85))
+
+    img.save(out_path, format="PNG")
+    return out_path
 
 
 def pattern_generator(options: dict[str, Any]) -> dict[str, Any]:
@@ -106,19 +188,29 @@ def pattern_generator(options: dict[str, Any]) -> dict[str, Any]:
     return {"status": "ok", "pattern": options, "note": "Dummy pattern generator output"}
 
 
-def background_change_ai(img_path: Path, out_path: Path) -> Path:
+def change_background(img_path: Path, out_path: Path, background: str = "studio") -> Path:
     """
-    Dummy background change.
+    Required API: background changer (dummy).
 
     TODO: integrate segmentation + background generation.
     """
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with Image.open(img_path) as im:
         im = im.convert("RGBA")
-        bg = Image.new("RGBA", im.size, (245, 248, 255, 255))
+        if background == "wedding":
+            bg = Image.new("RGBA", im.size, (255, 243, 246, 255))
+        elif background == "party":
+            bg = Image.new("RGBA", im.size, (240, 253, 250, 255))
+        else:
+            bg = Image.new("RGBA", im.size, (245, 248, 255, 255))
         out = Image.alpha_composite(bg, im)
         out.save(out_path, format="PNG")
     return out_path
+
+
+# Backwards-compatible name used internally.
+def background_change_ai(img_path: Path, out_path: Path) -> Path:
+    return change_background(img_path, out_path, background="studio")
 
 
 def video_tryon_dummy(img_path: Path) -> dict[str, Any]:

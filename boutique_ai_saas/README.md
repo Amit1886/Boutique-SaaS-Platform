@@ -37,6 +37,12 @@ Remove-Item Env:PYTHONPATH -ErrorAction SilentlyContinue
 - `/vendor/dashboard/`, `/tailor/dashboard/`, `/admin/dashboard/`
 - `/pos/`, `/inventory/`, `/pricing/`
 - `/api/` DRF routes, `/api/token/` JWT
+- `/trending/`, `/favorites/` Trending + saved templates/looks
+- `/<vendor>/tryon/video/` Video try-on (placeholder)
+- `/<vendor>/blouse/designer/` Blouse designer (placeholder image generator)
+- `/<vendor>/blueprint/pdf/` Cutting blueprint PDF (reportlab)
+- `/whatsapp/webhook/` Dummy WhatsApp webhook inbox
+- `/tailor/payroll/` Tailor payroll (per piece)
 
 ## PythonAnywhere (Free) deployment
 
@@ -100,3 +106,12 @@ Source: `android_webview_app/`
 2. Build locally (Android Studio) or via GitHub Actions:
    - Workflow: `.github/workflows/android_build.yml`
    - Artifacts: `app-debug.apk`, `app-release.apk` (release is signed with debug key for installability)
+
+## Git auto-push (optional)
+
+Local scripts:
+- PowerShell: `scripts/local/git_auto_push.ps1 -Message "auto update"`
+- Bash: `bash scripts/local/git_auto_push.sh "auto update"`
+
+GitHub Action (manual):
+- Workflow: `.github/workflows/auto_push.yml`

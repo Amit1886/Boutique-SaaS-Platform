@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "api.apps.ApiConfig",
     "mobile_api.apps.MobileApiConfig",
     "deployhook.apps.DeployhookConfig",
+    "whatsapp_bot.apps.WhatsappBotConfig",
 ]
 
 MIDDLEWARE = [
@@ -98,6 +99,8 @@ LANGUAGE_CODE = "en"
 LANGUAGES = [
     ("en", "English"),
     ("hi", "Hindi"),
+    ("ta", "Tamil"),
+    ("gu", "Gujarati"),
 ]
 TIME_ZONE = "Asia/Kolkata"
 USE_I18N = True

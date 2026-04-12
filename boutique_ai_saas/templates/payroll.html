@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Payroll{% endblock %}
+{% block content %}
+  <div class="flex items-end justify-between gap-3">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-bold">Tailor Payroll</h1>
+      <p class="text-slate-600 mt-1">Per-piece earnings (dummy rates; editable via task piece rate later).</p>
+    </div>
+    <a class="btn-secondary" href="{% url 'tailor_dashboard' %}">Back</a>
+  </div>
+
+  {% if tailor %}
+    <div class="mt-6 card p-6">
+      <div class="text-sm text-slate-500">Period</div>
+      <div class="font-semibold">{{ period_start }} → {{ period_end }}</div>
+      <div class="mt-2 text-sm text-slate-600">Pieces: {{ pieces }} · Total: ₹{{ total }}</div>
+      <form method="post" class="mt-4">
+        {% csrf_token %}
+        <button type="submit" class="btn-primary">Generate Payroll (Pending)</button>
+      </form>
+    </div>
+
+    <div class="mt-6 grid lg:grid-cols-2 gap-6 items-start">
+      <div class="card p-4 overflow-x-auto">
+        <div class="text-sm uppercase tracking-wider text-slate-500 p-2">Completed tasks</div>
+        <table class="min-w-[850px] w-full text-sm">
+          <thead class="bg-slate-50 border-b border-slate-200">
+            <tr class="text-left">
+              <th class="p-3">Task</th>
+              <th class="p-3">Order</th>
+              <th class="p-3">Product</th>
+              <th class="p-3">Completed</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200">
+            {% for t in tasks %}
+              <tr>
+                <td class="p-3 font-semibold">{{ t.task_type }}</td>
+                <td class="p-3">#{{ t.order.id }}</td>
+                <td class="p-3">{{ t.order.product.name }}</td>
+                <td class="p-3">{{ t.completed_at }}</td>
+              </tr>
+            {% empty %}
+              <tr><td class="p-4 text-slate-600" colspan="4">No completed tasks for this period.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card p-4 overflow-x-auto">
+        <div class="text-sm uppercase tracking-wider text-slate-500 p-2">Payroll history</div>
+        <table class="min-w-[850px] w-full text-sm">
+          <thead class="bg-slate-50 border-b border-slate-200">
+            <tr class="text-left">
+              <th class="p-3">Period</th>
+              <th class="p-3">Pieces</th>
+              <th class="p-3">Amount</th>
+              <th class="p-3">Status</th>
+              <th class="p-3">Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200">
+            {% for p in payments %}
+              <tr>
+                <td class="p-3">{{ p.period_start }} → {{ p.period_end }}</td>
+                <td class="p-3">{{ p.pieces_done }}</td>
+                <td class="p-3">₹{{ p.amount }}</td>
+                <td class="p-3">{{ p.status }}</td>
+                <td class="p-3">
+                  {% if p.status != "paid" %}
+                    <form method="post" action="{% url 'tailor_payroll_mark_paid' %}">
+                      {% csrf_token %}
+                      <input type="hidden" name="payment_id" value="{{ p.id }}" />
+                      <button type="submit" class="btn-secondary text-xs">Mark paid</button>
+                    </form>
+                  {% else %}
+                    <span class="text-xs text-slate-600">{{ p.paid_at }}</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td class="p-4 text-slate-600" colspan="5">No payroll generated yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% endif %}
+{% endblock %}
+

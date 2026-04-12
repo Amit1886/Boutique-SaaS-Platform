@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Cutting Blueprint · {{ vendor_obj.business_name }}{% endblock %}
+{% block content %}
+  <div class="flex items-end justify-between gap-3">
+    <div>
+      <div class="text-sm text-slate-500">{{ vendor_obj.business_name }}</div>
+      <h1 class="text-2xl md:text-3xl font-bold">Cutting Blueprint (PDF)</h1>
+      <p class="text-slate-600 mt-1">Generates a basic PDF via reportlab (fallback text file if reportlab missing).</p>
+    </div>
+    <a class="btn-secondary" href="/{{ vendor_obj.subdomain }}/">Back to store</a>
+  </div>
+
+  <div class="mt-6 card p-6">
+    <form method="post" class="grid sm:grid-cols-2 gap-4">
+      {% csrf_token %}
+      <div>
+        <div class="text-sm font-semibold mb-1">Bust (in)</div>
+        {{ form.bust_in }}
+      </div>
+      <div>
+        <div class="text-sm font-semibold mb-1">Waist (in)</div>
+        {{ form.waist_in }}
+      </div>
+      <div>
+        <div class="text-sm font-semibold mb-1">Hips (in)</div>
+        {{ form.hips_in }}
+      </div>
+      <div>
+        <div class="text-sm font-semibold mb-1">Shoulder (in)</div>
+        {{ form.shoulder_in }}
+      </div>
+      <div class="sm:col-span-2">
+        <button class="btn-primary" type="submit">Generate PDF</button>
+      </div>
+    </form>
+  </div>
+{% endblock %}
+
