@@ -35,10 +35,19 @@ class BlouseDesignerForm(forms.Form):
         choices=[("solid", "Solid"), ("floral", "Floral"), ("geometric", "Geometric")],
         initial="solid",
     )
+    border = forms.ChoiceField(
+        choices=[("none", "None"), ("lace", "Lace"), ("gold", "Gold"), ("mirror", "Mirror")],
+        initial="none",
+        required=False,
+    )
     color = forms.CharField(initial="#db2777")
 
 
 class BlueprintForm(forms.Form):
+    blueprint_type = forms.ChoiceField(
+        choices=[("blouse", "Blouse cutting sheet"), ("fall_pico", "Saree fall/pico sheet")],
+        initial="blouse",
+    )
     bust_in = forms.DecimalField(required=False, max_digits=6, decimal_places=2)
     waist_in = forms.DecimalField(required=False, max_digits=6, decimal_places=2)
     hips_in = forms.DecimalField(required=False, max_digits=6, decimal_places=2)

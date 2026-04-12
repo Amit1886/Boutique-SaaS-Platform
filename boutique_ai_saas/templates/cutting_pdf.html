@@ -13,6 +13,10 @@
   <div class="mt-6 card p-6">
     <form method="post" class="grid sm:grid-cols-2 gap-4">
       {% csrf_token %}
+      <div class="sm:col-span-2">
+        <div class="text-sm font-semibold mb-1">Blueprint type</div>
+        {{ form.blueprint_type }}
+      </div>
       <div>
         <div class="text-sm font-semibold mb-1">Bust (in)</div>
         {{ form.bust_in }}
@@ -35,4 +39,3 @@
     </form>
   </div>
 {% endblock %}
-

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Custom Templates · {{ vendor_obj.business_name }}{% endblock %}
+{% block content %}
+  <div class="flex items-end justify-between gap-3">
+    <div>
+      <div class="text-sm text-slate-500">{{ vendor_obj.business_name }}</div>
+      <h1 class="text-2xl md:text-3xl font-bold">Custom Design Templates</h1>
+      <p class="text-slate-600 mt-1">Saved from the blouse designer drag/drop builder.</p>
+    </div>
+    <a class="btn-secondary" href="{% url 'blouse_designer' vendor=vendor_obj.subdomain %}">Blouse Designer</a>
+  </div>
+
+  <div class="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
+    {% for t in templates %}
+      <div class="card p-3">
+        {% if t.preview %}
+          <img src="{{ t.preview.url }}" alt="{{ t.name }}" class="w-full h-40 object-cover rounded-xl border border-slate-200" />
+        {% endif %}
+        <div class="mt-2 text-sm font-semibold truncate">{{ t.name }}</div>
+        <div class="text-xs text-slate-600">{{ t.components.neck }} · {{ t.components.sleeve }} · {{ t.components.pattern }}</div>
+      </div>
+    {% empty %}
+      <div class="text-slate-600">No custom templates yet. Create one in Blouse Designer.</div>
+    {% endfor %}
+  </div>
+{% endblock %}
+

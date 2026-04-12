@@ -8,6 +8,7 @@ from boutique import views as boutique_views
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", boutique_views.home, name="home"),
+    path("i18n/", include("django.conf.urls.i18n")),
     path("trending/", boutique_views.trending, name="trending"),
     path("favorites/", boutique_views.favorites, name="favorites"),
     path("favorites/toggle/", boutique_views.toggle_favorite, name="toggle_favorite"),

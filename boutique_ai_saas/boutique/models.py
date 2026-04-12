@@ -65,3 +65,19 @@ class Favorite(models.Model):
 
     def __str__(self) -> str:
         return f"{self.user_id}:{self.template_id}"
+
+
+class CustomDesignTemplate(models.Model):
+    """
+    Saved custom design builder output (blouse components, borders, patterns, etc).
+    """
+
+    vendor = models.ForeignKey(VendorProfile, on_delete=models.CASCADE, related_name="custom_templates")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    name = models.CharField(max_length=200, default="Custom Template")
+    components = models.JSONField(default=dict, blank=True)
+    preview = models.ImageField(upload_to="custom_templates/", null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return f"{self.name} ({self.vendor.subdomain})"

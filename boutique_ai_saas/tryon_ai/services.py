@@ -154,7 +154,12 @@ def change_background(img_path: Path, output_path: Path, background: str, sessio
     return out
 
 
-def generate_cutting_pdf(measurements: dict, output_path: Path, session: TryOnSession | None = None) -> Path:
+def generate_cutting_pdf(
+    measurements: dict,
+    output_path: Path,
+    blueprint_type: str = "blouse",
+    session: TryOnSession | None = None,
+) -> Path:
     """
     Generate a PDF blueprint (reportlab when available).
     """
@@ -166,10 +171,13 @@ def generate_cutting_pdf(measurements: dict, output_path: Path, session: TryOnSe
 
         c = canvas.Canvas(str(output_path), pagesize=A4)
         w, h = A4
+        title = "Blouse Cutting Sheet" if blueprint_type == "blouse" else "Saree Fall/Pico Sheet"
         c.setFont("Helvetica-Bold", 16)
-        c.drawString(40, h - 60, "Cutting Blueprint (AI Placeholder)")
+        c.drawString(40, h - 60, f"{title} (AI Placeholder)")
         c.setFont("Helvetica", 11)
         y = h - 100
+        c.drawString(40, y, f"Type: {blueprint_type}")
+        y -= 22
         for k, v in measurements.items():
             c.drawString(40, y, f"{k}: {v}")
             y -= 18

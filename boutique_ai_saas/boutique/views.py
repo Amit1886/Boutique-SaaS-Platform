@@ -7,7 +7,12 @@ from django.views.decorators.http import require_http_methods
 from vendors.models import VendorProfile
 
 from analytics.services import get_personal_feed, get_trending_designs
-from .models import Favorite, Product, ProductCategory, SavedLook, TemplateDesign
+from django.conf import settings
+from django.views.decorators.csrf import csrf_protect
+
+from tryon_ai.ai import generate_blouse_design_image
+
+from .models import CustomDesignTemplate, Favorite, Product, ProductCategory, SavedLook, TemplateDesign
 
 
 def home(request: HttpRequest) -> HttpResponse:
@@ -85,3 +90,39 @@ def toggle_favorite(request: HttpRequest) -> HttpResponse:
     else:
         Favorite.objects.create(user=request.user, vendor=t.vendor, template=t)
     return redirect(request.META.get("HTTP_REFERER") or "favorites")
+
+
+@require_http_methods(["GET"])
+def custom_templates(request: HttpRequest, vendor: str) -> HttpResponse:
+    vendor_profile = get_object_or_404(VendorProfile, subdomain=vendor)
+    templates = CustomDesignTemplate.objects.filter(vendor=vendor_profile).order_by("-id")[:200]
+    return render(request, "custom_templates.html", {"vendor_obj": vendor_profile, "templates": templates})
+
+
+@csrf_protect
+@require_http_methods(["POST"])
+def save_custom_template(request: HttpRequest, vendor: str) -> HttpResponse:
+    vendor_profile = get_object_or_404(VendorProfile, subdomain=vendor)
+    name = (request.POST.get("name") or "Custom Template").strip()[:200]
+    components = {
+        "neck": request.POST.get("neck") or "round",
+        "sleeve": request.POST.get("sleeve") or "short",
+        "back": request.POST.get("back") or "u-back",
+        "pattern": request.POST.get("pattern") or "solid",
+        "border": request.POST.get("border") or "none",
+        "color": request.POST.get("color") or "#db2777",
+    }
+
+    obj = CustomDesignTemplate.objects.create(
+        vendor=vendor_profile,
+        user=request.user if request.user.is_authenticated else None,
+        name=name,
+        components=components,
+    )
+    from pathlib import Path
+
+    out = Path(settings.MEDIA_ROOT) / "custom_templates" / f"custom_{obj.pk}.png"
+    generate_blouse_design_image(components, out)
+    obj.preview.name = out.relative_to(Path(settings.MEDIA_ROOT)).as_posix()
+    obj.save(update_fields=["preview"])
+    return redirect("custom_templates", vendor=vendor_profile.subdomain)

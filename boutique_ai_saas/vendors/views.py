@@ -1,9 +1,12 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import Prefetch
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
 from accounts.models import UserProfile, UserRole
+from orders.models import Order, TrackingStage
+from tailors.models import TailorProfile, TailorTask, TaskStatus
 
 from .models import Plan, VendorProfile
 from .forms import VendorSettingsForm
@@ -84,3 +87,53 @@ def upgrade_plan(request):
         profile.role = UserRole.VENDOR
         profile.save(update_fields=["role"])
     return redirect("vendor_dashboard")
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def vendor_tailor_tasks(request):
+    vendor = VendorProfile.objects.filter(user=request.user).first()
+    if not vendor:
+        messages.error(request, "Vendor profile not found.")
+        return redirect("home")
+
+    tailors = TailorProfile.objects.filter(vendor=vendor).select_related("user").order_by("user__username")[:200]
+    orders = (
+        Order.objects.filter(vendor=vendor)
+        .select_related("product")
+        .prefetch_related(Prefetch("tailor_tasks", queryset=TailorTask.objects.select_related("tailor", "tailor__user").order_by("-id")))
+        .order_by("-id")[:200]
+    )
+
+    if request.method == "POST":
+        order_id = request.POST.get("order_id")
+        tailor_id = request.POST.get("tailor_id")
+        task_type = (request.POST.get("task_type") or "Cutting").strip()[:80]
+        piece_rate = request.POST.get("piece_rate") or "0"
+        deadline = request.POST.get("deadline") or None
+
+        order = Order.objects.filter(pk=order_id, vendor=vendor).first()
+        tailor = TailorProfile.objects.filter(pk=tailor_id, vendor=vendor).first()
+        if not order or not tailor:
+            messages.error(request, "Invalid order/tailor.")
+            return redirect("vendor_tailor_tasks")
+
+        try:
+            from decimal import Decimal
+
+            rate = Decimal(str(piece_rate))
+        except Exception:
+            rate = 0
+
+        TailorTask.objects.create(
+            tailor=tailor,
+            order=order,
+            task_type=task_type,
+            status=TaskStatus.PENDING,
+            deadline=deadline,
+            piece_rate=rate,
+        )
+        messages.success(request, "Task assigned.")
+        return redirect("vendor_tailor_tasks")
+
+    return render(request, "vendor_tasks.html", {"vendor": vendor, "tailors": tailors, "orders": orders})

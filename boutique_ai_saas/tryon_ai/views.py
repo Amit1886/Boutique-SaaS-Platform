@@ -22,6 +22,7 @@ from .models import BlouseDesign, CuttingBlueprint, TryOnSession, TryOnType, Vid
 from .services import (
     ai_fitting_recommend,
     change_background,
+    generate_3d_body_model,
     generate_blouse_design,
     generate_cutting_pdf,
     generate_tryon_image,
@@ -172,8 +173,12 @@ def measurement_api(request: HttpRequest) -> JsonResponse:
     with temp_path.open("wb") as f:
         for chunk in photo.chunks():
             f.write(chunk)
-    data = ai_measurement_extract(temp_path)
-    return JsonResponse({"ok": True, "data": data})
+    meas = ai_measurement_extract(temp_path)
+    from .services import ai_measurement_detect as ai_measurement_detect_service
+
+    detected = ai_measurement_detect_service(temp_path, session=None)
+    fitting = ai_fitting_recommend(detected, session=None)
+    return JsonResponse({"ok": True, "data": {"measurements": detected, "fitting": fitting, "raw": meas}})
 
 
 @require_http_methods(["POST"])
@@ -268,14 +273,19 @@ def cutting_pdf(request: HttpRequest, vendor: str) -> HttpResponse:
     if request.method == "POST":
         form = BlueprintForm(request.POST)
         if form.is_valid():
-            measurements = {k: float(v) for k, v in form.cleaned_data.items() if v is not None}
+            blueprint_type = form.cleaned_data.get("blueprint_type") or "blouse"
+            measurements = {
+                k: float(v)
+                for k, v in form.cleaned_data.items()
+                if k != "blueprint_type" and v is not None
+            }
             obj = CuttingBlueprint.objects.create(
                 vendor=vendor_obj,
                 user=request.user if request.user.is_authenticated else None,
                 measurements=measurements,
             )
             out = Path(settings.MEDIA_ROOT) / "blueprints" / f"cutting_{obj.pk}.pdf"
-            generate_cutting_pdf(measurements, out, session=None)
+            generate_cutting_pdf(measurements, out, blueprint_type=blueprint_type, session=None)
             obj.pdf.name = _save_relative(Path(settings.MEDIA_ROOT), out)
             obj.save(update_fields=["pdf"])
             return redirect(obj.pdf.url)
@@ -301,6 +311,40 @@ def background_change_api(request: HttpRequest, vendor: str) -> JsonResponse:
     session.ai_result.name = _save_relative(Path(settings.MEDIA_ROOT), out_img)
     session.save(update_fields=["ai_result"])
     return JsonResponse({"ok": True, "result_url": session.ai_result.url})
+
+
+@require_http_methods(["GET", "POST"])
+def tryon_3d(request: HttpRequest, vendor: str, session_id: int) -> HttpResponse:
+    vendor_obj = get_object_or_404(VendorProfile, subdomain=vendor)
+    session = get_object_or_404(TryOnSession, pk=session_id, vendor=vendor_obj)
+    body = getattr(session, "body_3d", None)
+    return render(request, "tryon_3d.html", {"vendor_obj": vendor_obj, "session": session, "body": body})
+
+
+@require_http_methods(["POST"])
+def generate_3d_api(request: HttpRequest, vendor: str) -> JsonResponse:
+    vendor_obj = get_object_or_404(VendorProfile, subdomain=vendor)
+    session_id = request.POST.get("session_id")
+    if not session_id:
+        return JsonResponse({"ok": False, "error": "session_id required"}, status=400)
+    session = get_object_or_404(TryOnSession, pk=session_id, vendor=vendor_obj)
+
+    body, _ = BodyModel3D.objects.get_or_create(
+        session=session,
+        defaults={
+            "vendor": vendor_obj,
+            "user": request.user if request.user.is_authenticated else None,
+            "status": BodyModel3D.Status.PROCESSING,
+        },
+    )
+    body.status = BodyModel3D.Status.PROCESSING
+    body.save(update_fields=["status"])
+
+    meta = generate_3d_body_model(Path(session.original_image.path), session=session)
+    body.meta = meta or {}
+    body.status = BodyModel3D.Status.SUCCEEDED
+    body.save(update_fields=["meta", "status"])
+    return JsonResponse({"ok": True, "status": body.status, "meta": body.meta})
 
 
 @login_required

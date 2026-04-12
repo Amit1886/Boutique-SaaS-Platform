@@ -114,11 +114,13 @@ def ai_fitting_recommend(measurements: dict[str, Any]) -> dict[str, Any]:
 
     sleeve = "cap" if shoulder <= 14.5 else "short"
     back = "u-back" if waist <= 30 else "deep-back"
+    pattern = "solid" if waist <= 30 else "geometric"
 
     return {
         "neck_design": neck,
         "sleeve_type": sleeve,
         "back_design": back,
+        "blouse_pattern": pattern,
         "confidence": 0.42,
         "note": "Dummy fitting recommendation (replace with AI model/rules)",
     }

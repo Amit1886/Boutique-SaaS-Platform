@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}3D Try-On · {{ vendor_obj.business_name }}{% endblock %}
+{% block content %}
+  <div class="flex items-end justify-between gap-3">
+    <div>
+      <div class="text-sm text-slate-500">{{ vendor_obj.business_name }}</div>
+      <h1 class="text-2xl md:text-3xl font-bold">3D Body Reconstruction</h1>
+      <p class="text-slate-600 mt-1">Dummy structure: generates metadata; mesh file is not produced yet.</p>
+    </div>
+    <a class="btn-secondary" href="{% url 'virtual_templates' vendor=vendor_obj.subdomain session_id=session.id %}">Back</a>
+  </div>
+
+  <div class="mt-6 grid lg:grid-cols-2 gap-6 items-start">
+    <div class="card p-6">
+      <div class="text-sm uppercase tracking-wider text-slate-500">Session</div>
+      <div class="mt-3 text-sm text-slate-700">
+        <div><span class="text-slate-500">ID:</span> {{ session.id }}</div>
+        <div><span class="text-slate-500">Type:</span> {{ session.type }}</div>
+      </div>
+      <div class="mt-4 rounded-2xl border border-slate-200 overflow-hidden bg-white">
+        <img src="{{ session.original_image.url }}" alt="Input" class="w-full object-contain" />
+      </div>
+      <div class="mt-4 flex gap-2">
+        <button class="btn-primary" type="button" id="genBtn">Generate 3D</button>
+      </div>
+      <div id="statusBox" class="mt-3 text-sm text-slate-700"></div>
+    </div>
+
+    <div class="card p-6">
+      <div class="text-sm uppercase tracking-wider text-slate-500">Output (meta)</div>
+      <pre id="metaBox" class="mt-4 text-xs bg-slate-50 border border-slate-200 rounded-2xl p-4 overflow-auto">{% if body %}{{ body.meta|default:"{}" }}{% else %}{}{% endif %}</pre>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      function getCookie(name) {
+        const m = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
+        return m ? decodeURIComponent(m[2]) : "";
+      }
+      const btn = document.getElementById("genBtn");
+      const statusBox = document.getElementById("statusBox");
+      const metaBox = document.getElementById("metaBox");
+      if (!btn) return;
+      btn.addEventListener("click", async () => {
+        statusBox.textContent = "Processing…";
+        try {
+          const res = await fetch("{% url 'generate_3d_api' vendor=vendor_obj.subdomain %}", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+              "X-CSRFToken": getCookie("csrftoken"),
+            },
+            body: new URLSearchParams({ session_id: "{{ session.id }}" }).toString(),
+          });
+          const json = await res.json();
+          if (!json.ok) throw new Error(json.error || "failed");
+          statusBox.textContent = "Status: " + json.status;
+          metaBox.textContent = JSON.stringify(json.meta || {}, null, 2);
+        } catch (e) {
+          statusBox.textContent = "Failed.";
+        }
+      });
+    })();
+  </script>
+{% endblock %}
+

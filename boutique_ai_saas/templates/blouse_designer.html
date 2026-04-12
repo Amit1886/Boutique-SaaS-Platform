@@ -50,6 +50,15 @@
               <span class="pill cursor-move" draggable="true" data-field="pattern" data-value="geometric">Geometric</span>
             </div>
           </div>
+          <div>
+            <div class="text-xs font-semibold text-slate-600 mb-1">Border</div>
+            <div class="flex flex-wrap gap-2">
+              <span class="pill cursor-move" draggable="true" data-field="border" data-value="none">None</span>
+              <span class="pill cursor-move" draggable="true" data-field="border" data-value="lace">Lace</span>
+              <span class="pill cursor-move" draggable="true" data-field="border" data-value="gold">Gold</span>
+              <span class="pill cursor-move" draggable="true" data-field="border" data-value="mirror">Mirror</span>
+            </div>
+          </div>
         </div>
         <div id="dropZone" class="mt-3 rounded-2xl border border-dashed border-slate-300 bg-white p-4 text-center text-sm text-slate-600">
           Drop here
@@ -74,6 +83,10 @@
           <div class="text-sm font-semibold mb-1">Pattern</div>
           {{ form.pattern }}
         </div>
+        <div>
+          <div class="text-sm font-semibold mb-1">Border</div>
+          {{ form.border }}
+        </div>
         <div class="sm:col-span-2">
           <div class="text-sm font-semibold mb-1">Color</div>
           {{ form.color }}
@@ -82,6 +95,28 @@
           <button class="btn-primary" type="submit">Generate Design</button>
         </div>
       </form>
+
+      <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-4">
+        <div class="text-sm font-semibold">Save as template</div>
+        <form method="post" action="{% url 'save_custom_template' vendor=vendor_obj.subdomain %}" class="mt-3 grid sm:grid-cols-2 gap-3">
+          {% csrf_token %}
+          <div class="sm:col-span-2">
+            <div class="text-xs text-slate-600 mb-1">Template name</div>
+            <input class="input" type="text" name="name" placeholder="My blouse template" />
+          </div>
+          <input type="hidden" name="neck" id="ct_neck" />
+          <input type="hidden" name="sleeve" id="ct_sleeve" />
+          <input type="hidden" name="back" id="ct_back" />
+          <input type="hidden" name="pattern" id="ct_pattern" />
+          <input type="hidden" name="border" id="ct_border" />
+          <input type="hidden" name="color" id="ct_color" />
+          <div class="sm:col-span-2">
+            <button class="btn-secondary" type="submit">Save Template</button>
+            <a class="btn-secondary ml-2" href="{% url 'custom_templates' vendor=vendor_obj.subdomain %}">View Templates</a>
+          </div>
+        </form>
+        <div class="text-xs text-slate-600 mt-2">Uses current form selections.</div>
+      </div>
 
       {% if design and design.image %}
         <div class="mt-6 rounded-2xl border border-slate-200 overflow-hidden bg-white">
@@ -124,6 +159,24 @@
         if (input) input.value = payload.value;
         zone.textContent = `Selected: ${payload.field} = ${payload.value}`;
       });
+
+      function syncCustomTemplateForm() {
+        const map = [
+          ["neck", "ct_neck"],
+          ["sleeve", "ct_sleeve"],
+          ["back", "ct_back"],
+          ["pattern", "ct_pattern"],
+          ["border", "ct_border"],
+          ["color", "ct_color"],
+        ];
+        map.forEach(([name, id]) => {
+          const src = document.querySelector(`[name='${name}']`);
+          const dst = document.getElementById(id);
+          if (src && dst) dst.value = src.value;
+        });
+      }
+      document.addEventListener("change", syncCustomTemplateForm);
+      syncCustomTemplateForm();
     })();
   </script>
 {% endblock %}

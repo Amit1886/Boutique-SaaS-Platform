@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Tailor Tasks{% endblock %}
+{% block content %}
+  <div class="flex items-end justify-between gap-3">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-bold">Tailor Task Manager</h1>
+      <p class="text-slate-600 mt-1">Assign tasks to tailors and track progress.</p>
+    </div>
+    <a class="btn-secondary" href="{% url 'vendor_dashboard' %}">Back</a>
+  </div>
+
+  {% if vendor %}
+    <div class="mt-6 card p-6">
+      <div class="text-sm text-slate-500">Vendor</div>
+      <div class="font-semibold">{{ vendor.business_name }} · /{{ vendor.subdomain }}/</div>
+    </div>
+
+    <div class="mt-6 card p-6">
+      <div class="text-sm uppercase tracking-wider text-slate-500">Assign task</div>
+      <form method="post" class="mt-4 grid md:grid-cols-5 gap-3">
+        {% csrf_token %}
+        <div class="md:col-span-2">
+          <label class="label">Order</label>
+          <select name="order_id" class="input">
+            {% for o in orders %}
+              <option value="{{ o.id }}">#{{ o.id }} · {{ o.product.name }} · {{ o.tracking_stage }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="label">Tailor</label>
+          <select name="tailor_id" class="input">
+            {% for t in tailors %}
+              <option value="{{ t.id }}">{{ t.user.username }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="label">Task type</label>
+          <select name="task_type" class="input">
+            <option>Cutting</option>
+            <option>Stitching</option>
+            <option>Finishing</option>
+            <option>Fall-Pico</option>
+          </select>
+        </div>
+        <div>
+          <label class="label">Piece rate (₹)</label>
+          <input class="input" name="piece_rate" type="number" step="0.01" value="0" />
+        </div>
+        <div class="md:col-span-2">
+          <label class="label">Deadline</label>
+          <input class="input" name="deadline" type="date" />
+        </div>
+        <div class="md:col-span-3 flex items-end">
+          <button class="btn-primary" type="submit">Assign</button>
+        </div>
+      </form>
+      {% if not tailors %}
+        <div class="mt-3 text-sm text-slate-600">No tailors found. Create TailorProfile in Django admin first.</div>
+      {% endif %}
+    </div>
+
+    <div class="mt-6 card p-4 overflow-x-auto">
+      <div class="text-sm uppercase tracking-wider text-slate-500 p-2">Orders & tasks</div>
+      <table class="min-w-[950px] w-full text-sm">
+        <thead class="bg-slate-50 border-b border-slate-200">
+          <tr class="text-left">
+            <th class="p-3">Order</th>
+            <th class="p-3">Product</th>
+            <th class="p-3">Stage</th>
+            <th class="p-3">Tasks</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-200">
+          {% for o in orders %}
+            <tr class="align-top">
+              <td class="p-3 font-semibold">#{{ o.id }}</td>
+              <td class="p-3">{{ o.product.name }}</td>
+              <td class="p-3">{{ o.tracking_stage }}</td>
+              <td class="p-3">
+                <div class="space-y-1">
+                  {% for t in o.tailor_tasks.all %}
+                    <div class="rounded-xl border border-slate-200 bg-white p-2">
+                      <div class="font-semibold">{{ t.task_type }} · {{ t.tailor.user.username }}</div>
+                      <div class="text-xs text-slate-600">Status: {{ t.status }} · Rate: ₹{{ t.piece_rate }} · Deadline: {{ t.deadline|default:"—" }}</div>
+                    </div>
+                  {% empty %}
+                    <div class="text-slate-600">No tasks</div>
+                  {% endfor %}
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+{% endblock %}
+

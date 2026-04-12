@@ -65,7 +65,7 @@
           setClip(afterImg, 50);
         }
         if (fittingBox && data.fitting) {
-          fittingBox.textContent = `Fitting: neck=${data.fitting.neck_design}, sleeve=${data.fitting.sleeve_type}, back=${data.fitting.back_design}`;
+          fittingBox.textContent = `Fitting: neck=${data.fitting.neck_design}, sleeve=${data.fitting.sleeve_type}, back=${data.fitting.back_design}, pattern=${data.fitting.blouse_pattern || "-"}`;
           fittingBox.classList.remove("hidden");
         }
       } catch (e) {
@@ -79,4 +79,3 @@
 
   document.addEventListener("DOMContentLoaded", init);
 })();
-
