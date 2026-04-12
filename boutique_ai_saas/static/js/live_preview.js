@@ -21,6 +21,16 @@
     const body = new URLSearchParams();
     body.set("session_id", String(c.sessionId));
     body.set("template_id", String(templateId));
+    if (c.fit) {
+      const scaleEl = document.getElementById(c.fit.scaleId);
+      const rotEl = document.getElementById(c.fit.rotateId);
+      const xEl = document.getElementById(c.fit.xId);
+      const yEl = document.getElementById(c.fit.yId);
+      if (scaleEl) body.set("scale", String((Number(scaleEl.value || 100) || 100) / 100.0));
+      if (rotEl) body.set("rotation_deg", String(Number(rotEl.value || 0) || 0));
+      if (xEl) body.set("x_offset_frac", String((Number(xEl.value || 0) || 0) / 100.0));
+      if (yEl) body.set("y_offset_frac", String((Number(yEl.value || 12) || 12) / 100.0));
+    }
 
     const res = await fetch(c.previewApiUrl, {
       method: "POST",

@@ -35,19 +35,34 @@ def remove_background(img_path: Path, out_path: Path) -> Path:
     return out_path
 
 
-def generate_2d_tryon(bg_removed_path: Path, template_path: Path, out_path: Path) -> Path:
+def generate_2d_tryon(
+    bg_removed_path: Path,
+    template_path: Path,
+    out_path: Path,
+    *,
+    scale: float = 1.0,
+    x_offset_frac: float = 0.0,
+    y_offset_frac: float = 0.12,
+    rotation_deg: float = 0.0,
+) -> Path:
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with Image.open(bg_removed_path) as base:
         base = base.convert("RGBA")
         with Image.open(template_path) as overlay:
             overlay = overlay.convert("RGBA")
-            target_w = base.size[0]
+            scale = float(scale or 1.0)
+            scale = max(0.2, min(scale, 2.5))
+            target_w = int(base.size[0] * scale)
             ratio = target_w / max(1, overlay.size[0])
             target_h = max(1, int(overlay.size[1] * ratio))
             overlay = overlay.resize((target_w, target_h), Image.Resampling.LANCZOS)
-            y_offset = int(base.size[1] * 0.12)
+            if rotation_deg:
+                overlay = overlay.rotate(float(rotation_deg), resample=Image.Resampling.BICUBIC, expand=True)
+            x_offset = int(base.size[0] * float(x_offset_frac or 0.0))
+            y_offset = int(base.size[1] * float(y_offset_frac or 0.12))
+            x = int((base.size[0] - overlay.size[0]) / 2) + x_offset
             canvas = Image.new("RGBA", base.size, (0, 0, 0, 0))
-            canvas.paste(overlay, (0, y_offset), overlay)
+            canvas.paste(overlay, (x, y_offset), overlay)
             out = Image.alpha_composite(base, canvas)
             out.save(out_path, format="PNG")
     return out_path

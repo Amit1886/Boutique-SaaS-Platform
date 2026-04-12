@@ -87,13 +87,31 @@ def remove_background(input_path: Path, output_path: Path, session: TryOnSession
     return out
 
 
-def generate_tryon(user_bg_removed: Path, template_path: Path, output_path: Path, session: TryOnSession | None = None) -> Path:
+def generate_tryon(
+    user_bg_removed: Path,
+    template_path: Path,
+    output_path: Path,
+    *,
+    scale: float = 1.0,
+    x_offset_frac: float = 0.0,
+    y_offset_frac: float = 0.12,
+    rotation_deg: float = 0.0,
+    session: TryOnSession | None = None,
+) -> Path:
     """
     Try-on generator (dummy overlay by default).
     TODO: wire HF_TRYON_MODEL / Replicate try-on model and store output.
     """
     start = time.time()
-    out = generate_2d_tryon(user_bg_removed, template_path, output_path)
+    out = generate_2d_tryon(
+        user_bg_removed,
+        template_path,
+        output_path,
+        scale=scale,
+        x_offset_frac=x_offset_frac,
+        y_offset_frac=y_offset_frac,
+        rotation_deg=rotation_deg,
+    )
     log_task(session, provider="dummy", task_type="generate_tryon", status="succeeded", duration_ms=int((time.time() - start) * 1000))
     return out
 
@@ -103,8 +121,27 @@ def generate_tryon(user_bg_removed: Path, template_path: Path, output_path: Path
 # ---------------------------------------------------------------------------
 
 
-def generate_tryon_image(user_bg_removed: Path, template_path: Path, output_path: Path, session: TryOnSession | None = None) -> Path:
-    return generate_tryon(user_bg_removed, template_path, output_path, session=session)
+def generate_tryon_image(
+    user_bg_removed: Path,
+    template_path: Path,
+    output_path: Path,
+    *,
+    scale: float = 1.0,
+    x_offset_frac: float = 0.0,
+    y_offset_frac: float = 0.12,
+    rotation_deg: float = 0.0,
+    session: TryOnSession | None = None,
+) -> Path:
+    return generate_tryon(
+        user_bg_removed,
+        template_path,
+        output_path,
+        scale=scale,
+        x_offset_frac=x_offset_frac,
+        y_offset_frac=y_offset_frac,
+        rotation_deg=rotation_deg,
+        session=session,
+    )
 
 
 def generate_video_tryon(input_video: Path, output_video: Path, session: TryOnSession | None = None) -> Path:

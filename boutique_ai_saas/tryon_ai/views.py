@@ -201,8 +201,28 @@ def tryon_preview_api(request: HttpRequest, vendor: str) -> JsonResponse:
     session = get_object_or_404(TryOnSession, pk=session_id, vendor=vendor_obj)
     template = get_object_or_404(TemplateDesign, pk=template_id, vendor=vendor_obj)
 
+    def _float(name: str, default: float) -> float:
+        try:
+            return float(request.POST.get(name, default))
+        except Exception:
+            return default
+
+    scale = _float("scale", 1.0)
+    x_offset_frac = _float("x_offset_frac", 0.0)
+    y_offset_frac = _float("y_offset_frac", 0.12)
+    rotation_deg = _float("rotation_deg", 0.0)
+
     out_img = Path(settings.MEDIA_ROOT) / "tryon" / "result" / f"preview_{session.pk}_{template.pk}.png"
-    generate_tryon_image(Path(session.bg_removed_image.path), Path(template.image.path), out_img, session=session)
+    generate_tryon_image(
+        Path(session.bg_removed_image.path),
+        Path(template.image.path),
+        out_img,
+        scale=scale,
+        x_offset_frac=x_offset_frac,
+        y_offset_frac=y_offset_frac,
+        rotation_deg=rotation_deg,
+        session=session,
+    )
     session.selected_template = template
     session.ai_result.name = _save_relative(Path(settings.MEDIA_ROOT), out_img)
     session.save(update_fields=["selected_template", "ai_result"])
@@ -219,7 +239,19 @@ def tryon_preview_api(request: HttpRequest, vendor: str) -> JsonResponse:
         pass
 
     rec = ai_fitting_recommend((session.measurement_data or {}).get("measurements", {}), session=session)
-    return JsonResponse({"ok": True, "result_url": session.ai_result.url, "fitting": rec})
+    return JsonResponse(
+        {
+            "ok": True,
+            "result_url": session.ai_result.url,
+            "fitting": rec,
+            "applied": {
+                "scale": scale,
+                "x_offset_frac": x_offset_frac,
+                "y_offset_frac": y_offset_frac,
+                "rotation_deg": rotation_deg,
+            },
+        }
+    )
 
 
 @require_http_methods(["GET", "POST"])
