@@ -9,11 +9,14 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.webkit.PermissionRequest
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
+import android.webkit.WebResourceError
+import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.result.contract.ActivityResultContracts
@@ -55,10 +58,17 @@ class MainActivity : AppCompatActivity() {
         val settings = webView.settings
         settings.javaScriptEnabled = true
         settings.domStorageEnabled = true
+        settings.loadsImagesAutomatically = true
+        settings.blockNetworkImage = false
         settings.allowFileAccess = true
         settings.allowContentAccess = true
         settings.mediaPlaybackRequiresUserGesture = false
-        settings.mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
+        // Helps when a page (or cached HTML) references http assets on an https origin.
+        settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+
+        // WebView can cache older HTML that still points to relative static/media URLs.
+        // Clearing cache avoids "site ok in browser, broken in app" after deployments.
+        webView.clearCache(true)
 
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
@@ -68,6 +78,20 @@ class MainActivity : AppCompatActivity() {
                     return openExternal(url)
                 }
                 return false
+            }
+
+            override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
+                super.onReceivedError(view, request, error)
+                Log.e("BoutiqueAISaaS", "WebView error: ${request?.url} ${error?.errorCode} ${error?.description}")
+            }
+
+            override fun onReceivedHttpError(
+                view: WebView?,
+                request: WebResourceRequest?,
+                errorResponse: WebResourceResponse?
+            ) {
+                super.onReceivedHttpError(view, request, errorResponse)
+                Log.e("BoutiqueAISaaS", "HTTP error: ${request?.url} ${errorResponse?.statusCode} ${errorResponse?.reasonPhrase}")
             }
         }
 
