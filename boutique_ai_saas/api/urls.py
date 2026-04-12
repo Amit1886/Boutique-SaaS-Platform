@@ -33,4 +33,6 @@ urlpatterns = [
     path("measurements/", measurement_api, name="measurement_api"),
     path("trending/", views.trending_api, name="trending_api"),
     path("personal-feed/", views.personal_feed_api, name="personal_feed_api"),
+    path("wallet/", views.wallet_summary_api, name="wallet_summary_api"),
+    path("tailors/<int:tailor_id>/reviews/", views.tailor_reviews_api, name="tailor_reviews_api"),
 ]

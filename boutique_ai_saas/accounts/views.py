@@ -92,7 +92,9 @@ def language_settings(request):
 def customer_dashboard(request):
     from boutique.models import SavedLook
     from orders.models import Order
+    from wallet.services import get_or_create_wallet
 
     looks = SavedLook.objects.filter(user=request.user).select_related("vendor").order_by("-id")[:100]
     orders = Order.objects.filter(user=request.user).select_related("vendor", "product").order_by("-id")[:100]
-    return render(request, "customer_dashboard.html", {"looks": looks, "orders": orders})
+    wallet = get_or_create_wallet(request.user)
+    return render(request, "customer_dashboard.html", {"looks": looks, "orders": orders, "wallet": wallet})

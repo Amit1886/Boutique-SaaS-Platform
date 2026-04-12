@@ -22,6 +22,7 @@ urlpatterns = [
     path("pos/", include("pos.urls")),
     path("inventory/", include("inventory.urls")),
     path("order/", include("orders.urls")),
+    path("wallet/", include("wallet.urls")),
     path("api/", include("api.urls")),
     path("mobile_api/", include("mobile_api.urls")),
     path("deploy/", include("deployhook.urls")),

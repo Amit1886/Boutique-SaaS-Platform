@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "mobile_api.apps.MobileApiConfig",
     "deployhook.apps.DeployhookConfig",
     "whatsapp_bot.apps.WhatsappBotConfig",
+    "wallet.apps.WalletConfig",
 ]
 
 MIDDLEWARE = [
@@ -134,6 +135,8 @@ HF_TRYON_MODEL = os.environ.get("HF_TRYON_MODEL", "")
 REPLICATE_API_TOKEN = os.environ.get("REPLICATE_API_TOKEN", "")
 
 DEFAULT_UPI_ID = os.environ.get("DEFAULT_UPI_ID", "")
+WALLET_CASHBACK_RATE = os.environ.get("WALLET_CASHBACK_RATE", "0.02")  # 2%
+WALLET_REFERRAL_BONUS = os.environ.get("WALLET_REFERRAL_BONUS", "25.00")  # INR
 
 # Production hardening (safe defaults; tune via env vars)
 if not DEBUG:

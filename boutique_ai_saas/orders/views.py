@@ -6,6 +6,7 @@ from django.conf import settings
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
+from django.contrib.auth.decorators import login_required
 
 from .models import Order, TrackingStage
 from .models import OrderFeedback
@@ -16,7 +17,15 @@ def order_track(request: HttpRequest, id: int) -> HttpResponse:
     order = get_object_or_404(Order.objects.select_related("vendor", "product", "tryon_session"), pk=id)
     stages = [s for s, _ in TrackingStage.choices]
     feedback = OrderFeedback.objects.filter(order=order).first()
-    return render(request, "order_track.html", {"order": order, "stages": stages, "feedback": feedback})
+    from tailors.models import TailorReview, TailorTask
+
+    tailor_task = TailorTask.objects.filter(order=order).select_related("tailor", "tailor__user").order_by("-id").first()
+    tailor_review = TailorReview.objects.filter(order=order).select_related("tailor", "tailor__user").first()
+    return render(
+        request,
+        "order_track.html",
+        {"order": order, "stages": stages, "feedback": feedback, "tailor_task": tailor_task, "tailor_review": tailor_review},
+    )
 
 
 @require_http_methods(["POST"])
@@ -36,4 +45,27 @@ def submit_feedback(request: HttpRequest, id: int):
     rating = max(1, min(5, rating))
     comment = request.POST.get("comment") or ""
     OrderFeedback.objects.update_or_create(order=order, defaults={"rating": rating, "comment": comment})
+    return redirect("order_track", id=order.pk)
+
+
+@login_required
+@require_http_methods(["POST"])
+def submit_tailor_review(request: HttpRequest, id: int):
+    order = get_object_or_404(Order, pk=id, user=request.user)
+    if order.tracking_stage != TrackingStage.COMPLETED:
+        return redirect("order_track", id=order.pk)
+
+    from tailors.models import TailorReview, TailorTask
+
+    task = TailorTask.objects.filter(order=order).select_related("tailor").first()
+    if not task:
+        return redirect("order_track", id=order.pk)
+
+    rating = int(request.POST.get("rating") or 5)
+    rating = max(1, min(5, rating))
+    comment = request.POST.get("comment") or ""
+    TailorReview.objects.update_or_create(
+        order=order,
+        defaults={"tailor": task.tailor, "user": request.user, "rating": rating, "comment": comment},
+    )
     return redirect("order_track", id=order.pk)

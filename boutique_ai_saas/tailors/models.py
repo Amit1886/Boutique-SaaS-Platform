@@ -12,6 +12,8 @@ class TailorProfile(models.Model):
     vendor = models.ForeignKey(VendorProfile, on_delete=models.CASCADE)
     speciality = models.CharField(max_length=120, blank=True)
     daily_capacity = models.PositiveIntegerField(default=5)
+    avg_rating = models.DecimalField(max_digits=3, decimal_places=2, default=0)
+    rating_count = models.PositiveIntegerField(default=0)
 
     def __str__(self) -> str:
         return f"{self.user.username} ({self.vendor.subdomain})"
@@ -54,3 +56,18 @@ class TailorPayment(models.Model):
 
     def __str__(self) -> str:
         return f"Payment#{self.pk} ({self.tailor_id})"
+
+
+class TailorReview(models.Model):
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name="tailor_review")
+    tailor = models.ForeignKey(TailorProfile, on_delete=models.CASCADE, related_name="reviews")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    rating = models.PositiveSmallIntegerField(default=5)
+    comment = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-id"]
+
+    def __str__(self) -> str:
+        return f"TailorReview#{self.order_id} ({self.rating}/5)"

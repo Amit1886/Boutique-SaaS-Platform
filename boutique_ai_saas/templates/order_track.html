@@ -69,4 +69,43 @@
       </div>
     </form>
   </div>
+
+  <div class="mt-6 card p-6">
+    <div class="text-sm uppercase tracking-wider text-slate-500">Tailor Review</div>
+    {% if tailor_task and tailor_task.tailor %}
+      <div class="mt-3 text-sm text-slate-700">
+        Assigned tailor: <span class="font-semibold">{{ tailor_task.tailor.user.username }}</span>
+        <span class="text-xs text-slate-500">({{ tailor_task.tailor.avg_rating }}/5, {{ tailor_task.tailor.rating_count }} ratings)</span>
+      </div>
+    {% else %}
+      <div class="mt-3 text-sm text-slate-600">No tailor assigned yet.</div>
+    {% endif %}
+
+    {% if order.tracking_stage != "Completed" %}
+      <div class="mt-2 text-xs text-slate-500">Tailor review unlocks after order is completed.</div>
+    {% else %}
+      {% if tailor_review %}
+        <div class="mt-3 text-sm text-slate-700">You rated: <span class="font-semibold">{{ tailor_review.rating }}/5</span></div>
+        <div class="mt-1 text-sm text-slate-600">{{ tailor_review.comment }}</div>
+      {% endif %}
+      <form method="post" action="{% url 'order_tailor_review' id=order.id %}" class="mt-4 grid md:grid-cols-3 gap-3 items-end">
+        {% csrf_token %}
+        <div>
+          <label class="label">Rating</label>
+          <select name="rating" class="input">
+            {% for r in "12345" %}
+              <option value="{{ r }}" {% if tailor_review and tailor_review.rating|stringformat:"s" == r %}selected{% endif %}>{{ r }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="md:col-span-2">
+          <label class="label">Comment</label>
+          <input class="input" type="text" name="comment" value="{{ tailor_review.comment|default:'' }}" placeholder="Tailor feedback" />
+        </div>
+        <div class="md:col-span-3">
+          <button class="btn-secondary" type="submit">Submit Tailor Review</button>
+        </div>
+      </form>
+    {% endif %}
+  </div>
 {% endblock %}

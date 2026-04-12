@@ -5,12 +5,26 @@ from django.dispatch import receiver
 
 from analytics.models import VendorAnalytics
 
-from .models import Order
+from .models import Order, TrackingStage
 from .notifications import send_email_sms, send_whatsapp_update
 
 
 @receiver(post_save, sender=Order)
 def on_order_created(sender, instance: Order, created: bool, **kwargs) -> None:
+    # Wallet cashback: create pending on new order; settle when completed/canceled.
+    try:
+        from wallet.services import create_cashback_pending, settle_cashback
+
+        if created:
+            create_cashback_pending(user=instance.user, order_id=instance.pk, order_amount=instance.amount)
+        else:
+            if instance.user and instance.tracking_stage == TrackingStage.COMPLETED:
+                settle_cashback(user=instance.user, order_id=instance.pk, succeed=True)
+            if instance.user and (instance.status or "").lower() in {"canceled", "cancelled"}:
+                settle_cashback(user=instance.user, order_id=instance.pk, succeed=False)
+    except Exception:
+        pass
+
     if not created:
         return
 

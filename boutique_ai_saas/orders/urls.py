@@ -6,4 +6,5 @@ urlpatterns = [
     path("track/<int:id>/", views.order_track, name="order_track"),
     path("invoice/<int:id>/", views.order_invoice_generate, name="order_invoice_generate"),
     path("feedback/<int:id>/", views.submit_feedback, name="order_feedback"),
+    path("tailor-review/<int:id>/", views.submit_tailor_review, name="order_tailor_review"),
 ]

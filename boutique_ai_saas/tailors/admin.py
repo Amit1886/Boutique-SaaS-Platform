@@ -1,11 +1,11 @@
 from django.contrib import admin
 
-from .models import TailorPayment, TailorProfile, TailorTask
+from .models import TailorPayment, TailorProfile, TailorReview, TailorTask
 
 
 @admin.register(TailorProfile)
 class TailorProfileAdmin(admin.ModelAdmin):
-    list_display = ("user", "vendor", "speciality", "daily_capacity")
+    list_display = ("user", "vendor", "speciality", "daily_capacity", "avg_rating", "rating_count")
     list_filter = ("vendor",)
     search_fields = ("user__username", "vendor__subdomain")
 
@@ -22,3 +22,10 @@ class TailorPaymentAdmin(admin.ModelAdmin):
     list_display = ("id", "tailor", "period_start", "period_end", "pieces_done", "amount", "status", "paid_at")
     list_filter = ("status", "tailor__vendor", "period_start")
     search_fields = ("id", "tailor__user__username", "tailor__vendor__subdomain")
+
+
+@admin.register(TailorReview)
+class TailorReviewAdmin(admin.ModelAdmin):
+    list_display = ("id", "tailor", "order", "rating", "user", "created_at")
+    list_filter = ("rating", "tailor__vendor")
+    search_fields = ("id", "order__id", "tailor__user__username", "user__username")
