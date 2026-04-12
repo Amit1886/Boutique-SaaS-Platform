@@ -6,6 +6,9 @@ from django.urls import include, path
 from boutique import views as boutique_views
 
 urlpatterns = [
+    # Important: keep custom admin pages BEFORE Django admin/, otherwise admin/ will catch them.
+    path("admin/dashboard/", include("analytics.urls_admin")),
+    path("admin/orders/", include("orders.urls_admin")),
     path("admin/", admin.site.urls),
     path("", boutique_views.home, name="home"),
     path("i18n/", include("django.conf.urls.i18n")),
@@ -16,8 +19,6 @@ urlpatterns = [
     path("accounts/", include("accounts.urls")),
     path("vendor/", include("vendors.urls_dashboard")),
     path("tailor/", include("tailors.urls_dashboard")),
-    path("admin/dashboard/", include("analytics.urls_admin")),
-    path("admin/orders/", include("orders.urls_admin")),
     path("pos/", include("pos.urls")),
     path("inventory/", include("inventory.urls")),
     path("order/", include("orders.urls")),
