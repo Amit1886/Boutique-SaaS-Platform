@@ -34,6 +34,7 @@ class TemplateDesign(models.Model):
     image = models.ImageField(upload_to="templates/")
     default_flag = models.BooleanField(default=False)
     name = models.CharField(max_length=200, default="Template")
+    fit_meta = models.JSONField(default=dict, blank=True)
 
     def __str__(self) -> str:
         return f"{self.name} ({self.vendor.subdomain})"

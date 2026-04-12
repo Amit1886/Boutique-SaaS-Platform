@@ -25,6 +25,36 @@
       window.BOUTIQUE_AI.applyOverlayTransform(overlayImg, { scale, rotation_deg, x_px, y_px });
     }
 
+    // Drag overlay to fine-tune without guessing sliders.
+    let dragging = false;
+    let startX = 0;
+    let startY = 0;
+    let startXVal = 0;
+    let startYVal = 0;
+
+    overlayImg.style.touchAction = "none";
+    overlayImg.addEventListener("pointerdown", (e) => {
+      dragging = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      startXVal = Number(xEl.value || 0) || 0;
+      startYVal = Number(yEl.value || 12) || 12;
+      overlayImg.setPointerCapture(e.pointerId);
+    });
+    overlayImg.addEventListener("pointermove", (e) => {
+      if (!dragging) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      const dxFrac = (dx / Math.max(1, baseImg.clientWidth)) * 100;
+      const dyFrac = (dy / Math.max(1, baseImg.clientHeight)) * 100;
+      xEl.value = String(Math.max(-20, Math.min(20, startXVal + dxFrac)));
+      yEl.value = String(Math.max(0, Math.min(30, startYVal + dyFrac)));
+      apply();
+    });
+    overlayImg.addEventListener("pointerup", () => {
+      dragging = false;
+    });
+
     ["input", "change"].forEach((ev) => {
       scaleEl.addEventListener(ev, apply);
       rotEl.addEventListener(ev, apply);
@@ -39,4 +69,3 @@
 
   document.addEventListener("DOMContentLoaded", init);
 })();
-

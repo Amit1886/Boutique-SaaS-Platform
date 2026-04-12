@@ -5,6 +5,7 @@ from pathlib import Path
 import shutil
 
 from django.conf import settings
+from PIL import Image
 
 from .ai import (
     ai_fitting_recommend as _ai_fitting_recommend,
@@ -92,10 +93,10 @@ def generate_tryon(
     template_path: Path,
     output_path: Path,
     *,
-    scale: float = 1.0,
-    x_offset_frac: float = 0.0,
-    y_offset_frac: float = 0.12,
-    rotation_deg: float = 0.0,
+    scale: float | None = None,
+    x_offset_frac: float | None = None,
+    y_offset_frac: float | None = None,
+    rotation_deg: float | None = None,
     session: TryOnSession | None = None,
 ) -> Path:
     """
@@ -103,6 +104,13 @@ def generate_tryon(
     TODO: wire HF_TRYON_MODEL / Replicate try-on model and store output.
     """
     start = time.time()
+    if scale is None or x_offset_frac is None or y_offset_frac is None or rotation_deg is None:
+        auto = _auto_fit_params(user_bg_removed, template_path)
+        scale = auto["scale"] if scale is None else scale
+        x_offset_frac = auto["x_offset_frac"] if x_offset_frac is None else x_offset_frac
+        y_offset_frac = auto["y_offset_frac"] if y_offset_frac is None else y_offset_frac
+        rotation_deg = auto["rotation_deg"] if rotation_deg is None else rotation_deg
+
     out = generate_2d_tryon(
         user_bg_removed,
         template_path,
@@ -126,10 +134,10 @@ def generate_tryon_image(
     template_path: Path,
     output_path: Path,
     *,
-    scale: float = 1.0,
-    x_offset_frac: float = 0.0,
-    y_offset_frac: float = 0.12,
-    rotation_deg: float = 0.0,
+    scale: float | None = None,
+    x_offset_frac: float | None = None,
+    y_offset_frac: float | None = None,
+    rotation_deg: float | None = None,
     session: TryOnSession | None = None,
 ) -> Path:
     return generate_tryon(
@@ -142,6 +150,62 @@ def generate_tryon_image(
         rotation_deg=rotation_deg,
         session=session,
     )
+
+
+def _alpha_bbox(path: Path) -> tuple[int, int, int, int] | None:
+    with Image.open(path) as im:
+        im = im.convert("RGBA")
+        alpha = im.split()[-1]
+        bbox = alpha.getbbox()
+        return bbox
+
+
+def _auto_fit_params(user_bg_removed: Path, template_path: Path) -> dict:
+    """
+    Auto-fit template onto the person using simple alpha bbox heuristics.
+    Works well if bg_removed image has transparent background.
+    """
+    with Image.open(user_bg_removed) as base:
+        base = base.convert("RGBA")
+        base_w, base_h = base.size
+
+    body_bbox = _alpha_bbox(user_bg_removed)
+    tpl_bbox = _alpha_bbox(template_path)
+
+    # Fallbacks if template has no alpha bbox etc.
+    if not body_bbox or not tpl_bbox:
+        return {"scale": 1.0, "x_offset_frac": 0.0, "y_offset_frac": 0.12, "rotation_deg": 0.0}
+
+    bl, bt, br, bb = body_bbox
+    tl, tt, tr, tb = tpl_bbox
+    body_w = max(1, br - bl)
+    body_h = max(1, bb - bt)
+
+    tpl_w = max(1, tr - tl)
+    tpl_h = max(1, tb - tt)
+
+    # Try to match garment width to body width with a small margin.
+    desired_w = int(body_w * 1.08)
+    scale = desired_w / max(1, base_w)
+
+    # Place garment slightly below the top of the detected body bbox.
+    y_px = int(bt + body_h * 0.08)
+    y_offset_frac = y_px / max(1, base_h)
+
+    # Center garment on body bbox center.
+    overlay_w_after = int(base_w * scale)
+    body_cx = int((bl + br) / 2)
+    x_desired = int(body_cx - overlay_w_after / 2)
+    x_centered = int((base_w - overlay_w_after) / 2)
+    x_offset_px = x_desired - x_centered
+    x_offset_frac = x_offset_px / max(1, base_w)
+
+    return {
+        "scale": float(max(0.55, min(scale, 1.35))),
+        "x_offset_frac": float(max(-0.25, min(x_offset_frac, 0.25))),
+        "y_offset_frac": float(max(0.02, min(y_offset_frac, 0.30))),
+        "rotation_deg": 0.0,
+    }
 
 
 def generate_video_tryon(input_video: Path, output_video: Path, session: TryOnSession | None = None) -> Path:

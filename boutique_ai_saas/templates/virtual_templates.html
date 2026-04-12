@@ -114,6 +114,12 @@
             </div>
           </div>
           <div class="mt-3 text-xs text-slate-500">Tip: Scale 90–110, Y 10–16 usually best.</div>
+          <div class="mt-3 flex flex-wrap gap-2">
+            <button class="btn-secondary text-sm" type="button" id="fitAutoBtn">Auto fit</button>
+            {% if user.is_authenticated %}
+              <button class="btn-secondary text-sm" type="button" id="fitSaveBtn">Save fit (Vendor)</button>
+            {% endif %}
+          </div>
         </div>
 
         <div class="mt-4 grid sm:grid-cols-3 gap-3 text-sm">
@@ -150,7 +156,9 @@
         scaleId: "fitScale",
         rotateId: "fitRotate",
         xId: "fitX",
-        yId: "fitY"
+        yId: "fitY",
+        autoBtnId: "fitAutoBtn",
+        saveBtnId: "fitSaveBtn"
       },
       ar: {
         startBtnId: "arStartBtn",

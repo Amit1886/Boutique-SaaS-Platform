@@ -201,16 +201,30 @@ def tryon_preview_api(request: HttpRequest, vendor: str) -> JsonResponse:
     session = get_object_or_404(TryOnSession, pk=session_id, vendor=vendor_obj)
     template = get_object_or_404(TemplateDesign, pk=template_id, vendor=vendor_obj)
 
-    def _float(name: str, default: float) -> float:
+    def _opt_float(name: str) -> float | None:
+        raw = request.POST.get(name, "")
+        if raw is None or str(raw).strip() == "":
+            return None
         try:
-            return float(request.POST.get(name, default))
+            return float(raw)
         except Exception:
-            return default
+            return None
 
-    scale = _float("scale", 1.0)
-    x_offset_frac = _float("x_offset_frac", 0.0)
-    y_offset_frac = _float("y_offset_frac", 0.12)
-    rotation_deg = _float("rotation_deg", 0.0)
+    # Use per-template defaults when available, otherwise auto-fit.
+    defaults = (template.fit_meta or {}) if hasattr(template, "fit_meta") else {}
+
+    scale = _opt_float("scale")
+    x_offset_frac = _opt_float("x_offset_frac")
+    y_offset_frac = _opt_float("y_offset_frac")
+    rotation_deg = _opt_float("rotation_deg")
+    if scale is None and "scale" in defaults:
+        scale = float(defaults.get("scale"))
+    if x_offset_frac is None and "x_offset_frac" in defaults:
+        x_offset_frac = float(defaults.get("x_offset_frac"))
+    if y_offset_frac is None and "y_offset_frac" in defaults:
+        y_offset_frac = float(defaults.get("y_offset_frac"))
+    if rotation_deg is None and "rotation_deg" in defaults:
+        rotation_deg = float(defaults.get("rotation_deg"))
 
     out_img = Path(settings.MEDIA_ROOT) / "tryon" / "result" / f"preview_{session.pk}_{template.pk}.png"
     generate_tryon_image(
@@ -239,6 +253,24 @@ def tryon_preview_api(request: HttpRequest, vendor: str) -> JsonResponse:
         pass
 
     rec = ai_fitting_recommend((session.measurement_data or {}).get("measurements", {}), session=session)
+
+    # Optional: save fit defaults on the template (vendor users only).
+    if request.user.is_authenticated and request.POST.get("save_fit") == "1":
+        try:
+            from accounts.models import UserProfile, UserRole
+
+            profile = UserProfile.objects.filter(user=request.user).first()
+            if profile and profile.role == UserRole.VENDOR and template.vendor_id == vendor_obj.id:
+                template.fit_meta = {
+                    "scale": scale,
+                    "x_offset_frac": x_offset_frac,
+                    "y_offset_frac": y_offset_frac,
+                    "rotation_deg": rotation_deg,
+                }
+                template.save(update_fields=["fit_meta"])
+        except Exception:
+            pass
+
     return JsonResponse(
         {
             "ok": True,

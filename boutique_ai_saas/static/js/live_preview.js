@@ -30,6 +30,7 @@
       if (rotEl) body.set("rotation_deg", String(Number(rotEl.value || 0) || 0));
       if (xEl) body.set("x_offset_frac", String((Number(xEl.value || 0) || 0) / 100.0));
       if (yEl) body.set("y_offset_frac", String((Number(yEl.value || 12) || 12) / 100.0));
+      if (c._saveFit === true) body.set("save_fit", "1");
     }
 
     const res = await fetch(c.previewApiUrl, {
@@ -85,6 +86,39 @@
         }
       }
     });
+
+    // Auto fit resets sliders to defaults, then triggers a re-preview on the last selected template.
+    const autoBtn = c.fit && document.getElementById(c.fit.autoBtnId);
+    const saveBtn = c.fit && document.getElementById(c.fit.saveBtnId);
+    let lastTemplateId = null;
+    window.addEventListener("boutique:template_selected", (ev) => {
+      lastTemplateId = ev && ev.detail && ev.detail.templateId ? String(ev.detail.templateId) : lastTemplateId;
+    });
+    if (autoBtn) {
+      autoBtn.addEventListener("click", () => {
+        const scaleEl = document.getElementById(c.fit.scaleId);
+        const rotEl = document.getElementById(c.fit.rotateId);
+        const xEl = document.getElementById(c.fit.xId);
+        const yEl = document.getElementById(c.fit.yId);
+        if (scaleEl) scaleEl.value = "100";
+        if (rotEl) rotEl.value = "0";
+        if (xEl) xEl.value = "0";
+        if (yEl) yEl.value = "12";
+        if (lastTemplateId) window.dispatchEvent(new CustomEvent("boutique:template_selected", { detail: { templateId: lastTemplateId } }));
+      });
+    }
+    if (saveBtn) {
+      saveBtn.addEventListener("click", async () => {
+        if (!lastTemplateId) return;
+        try {
+          c._saveFit = true;
+          await preview(lastTemplateId);
+        } catch (e) {
+        } finally {
+          c._saveFit = false;
+        }
+      });
+    }
   }
 
   document.addEventListener("DOMContentLoaded", init);
