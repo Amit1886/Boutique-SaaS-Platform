@@ -5,6 +5,7 @@ from pathlib import Path
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.utils import OperationalError, ProgrammingError
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -111,13 +112,17 @@ def virtual_generate(request: HttpRequest, vendor: str) -> HttpResponse:
     session.ai_result.name = _save_relative(Path(settings.MEDIA_ROOT), out_img)
     session.save(update_fields=["selected_template", "ai_result", "type"])
 
-    TemplateUsageEvent.objects.create(
-        vendor=vendor_obj,
-        template=template,
-        user_id=request.user.id if request.user.is_authenticated else None,
-        event_type=TemplateUsageEvent.EventType.TRYON,
-        meta={"session_id": session.pk, "source": "virtual_generate"},
-    )
+    try:
+        TemplateUsageEvent.objects.create(
+            vendor=vendor_obj,
+            template=template,
+            user_id=request.user.id if request.user.is_authenticated else None,
+            event_type=TemplateUsageEvent.EventType.TRYON,
+            meta={"session_id": session.pk, "source": "virtual_generate"},
+        )
+    except (OperationalError, ProgrammingError):
+        # Migrations might not be applied yet on a fresh DB.
+        pass
 
     return render(request, "virtual_result.html", {"vendor_obj": vendor_obj, "session": session})
 
@@ -202,13 +207,16 @@ def tryon_preview_api(request: HttpRequest, vendor: str) -> JsonResponse:
     session.ai_result.name = _save_relative(Path(settings.MEDIA_ROOT), out_img)
     session.save(update_fields=["selected_template", "ai_result"])
 
-    TemplateUsageEvent.objects.create(
-        vendor=vendor_obj,
-        template=template,
-        user_id=request.user.id if request.user.is_authenticated else None,
-        event_type=TemplateUsageEvent.EventType.TRYON,
-        meta={"session_id": session.pk, "source": "preview"},
-    )
+    try:
+        TemplateUsageEvent.objects.create(
+            vendor=vendor_obj,
+            template=template,
+            user_id=request.user.id if request.user.is_authenticated else None,
+            event_type=TemplateUsageEvent.EventType.TRYON,
+            meta={"session_id": session.pk, "source": "preview"},
+        )
+    except (OperationalError, ProgrammingError):
+        pass
 
     rec = ai_fitting_recommend((session.measurement_data or {}).get("measurements", {}), session=session)
     return JsonResponse({"ok": True, "result_url": session.ai_result.url, "fitting": rec})
