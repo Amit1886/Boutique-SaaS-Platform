@@ -105,7 +105,7 @@ def generate_tryon(
     """
     start = time.time()
     if scale is None or x_offset_frac is None or y_offset_frac is None or rotation_deg is None:
-        auto = _auto_fit_params(user_bg_removed, template_path)
+        auto = auto_fit_params(user_bg_removed, template_path)
         scale = auto["scale"] if scale is None else scale
         x_offset_frac = auto["x_offset_frac"] if x_offset_frac is None else x_offset_frac
         y_offset_frac = auto["y_offset_frac"] if y_offset_frac is None else y_offset_frac
@@ -160,7 +160,7 @@ def _alpha_bbox(path: Path) -> tuple[int, int, int, int] | None:
         return bbox
 
 
-def _auto_fit_params(user_bg_removed: Path, template_path: Path) -> dict:
+def auto_fit_params(user_bg_removed: Path, template_path: Path) -> dict:
     """
     Auto-fit template onto the person using simple alpha bbox heuristics.
     Works well if bg_removed image has transparent background.

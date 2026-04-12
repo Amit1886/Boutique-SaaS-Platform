@@ -87,8 +87,12 @@
           <div class="mt-3 rounded-2xl border border-slate-200 overflow-hidden bg-white relative" id="beforeAfterBox">
             <img id="beforeImg" src="{{ session.bg_removed_image.url }}" alt="Before" class="w-full object-contain bg-white" />
             <img id="afterImg" src="{% if session.ai_result %}{{ session.ai_result.url }}{% endif %}" alt="After" class="w-full object-contain absolute inset-0 bg-white" style="clip-path: inset(0 50% 0 0);" />
+            <div id="previewLoading" class="hidden absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center text-sm text-slate-700">
+              Generating preview…
+            </div>
             <input id="beforeAfterSlider" type="range" min="0" max="100" value="50" class="absolute inset-x-4 bottom-4 w-[calc(100%-2rem)]" />
           </div>
+          <div id="previewStatus" class="mt-2 text-xs text-slate-500"></div>
           <div id="fittingBox" class="mt-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700 hidden"></div>
         </div>
 
@@ -152,6 +156,8 @@
       afterImageId: "afterImg",
       fittingBoxId: "fittingBox",
       beforeAfterSliderId: "beforeAfterSlider",
+      previewStatusId: "previewStatus",
+      previewLoadingId: "previewLoading",
       fit: {
         scaleId: "fitScale",
         rotateId: "fitRotate",

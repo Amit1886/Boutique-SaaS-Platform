@@ -19,10 +19,11 @@ from vendors.models import VendorProfile
 
 from .ai import ai_face_shape, ai_measurement_extract, ai_skin_tone, generate_3d_body
 from .forms import BlouseDesignerForm, BlueprintForm, OrderConfirmForm, VideoTryOnForm, VirtualUploadForm
-from .models import BlouseDesign, CuttingBlueprint, TryOnSession, TryOnType, VideoTryOnJob
+from .models import BlouseDesign, BodyModel3D, CuttingBlueprint, TryOnSession, TryOnType, VideoTryOnJob
 from .services import (
     ai_fitting_recommend,
     change_background,
+    auto_fit_params,
     generate_3d_body_model,
     generate_blouse_design,
     generate_cutting_pdf,
@@ -226,6 +227,14 @@ def tryon_preview_api(request: HttpRequest, vendor: str) -> JsonResponse:
     if rotation_deg is None and "rotation_deg" in defaults:
         rotation_deg = float(defaults.get("rotation_deg"))
 
+    # If still unset, compute auto-fit so the response can apply it to sliders.
+    if scale is None or x_offset_frac is None or y_offset_frac is None or rotation_deg is None:
+        auto = auto_fit_params(Path(session.bg_removed_image.path), Path(template.image.path))
+        scale = auto["scale"] if scale is None else scale
+        x_offset_frac = auto["x_offset_frac"] if x_offset_frac is None else x_offset_frac
+        y_offset_frac = auto["y_offset_frac"] if y_offset_frac is None else y_offset_frac
+        rotation_deg = auto["rotation_deg"] if rotation_deg is None else rotation_deg
+
     out_img = Path(settings.MEDIA_ROOT) / "tryon" / "result" / f"preview_{session.pk}_{template.pk}.png"
     generate_tryon_image(
         Path(session.bg_removed_image.path),
@@ -389,7 +398,11 @@ def background_change_api(request: HttpRequest, vendor: str) -> JsonResponse:
 def tryon_3d(request: HttpRequest, vendor: str, session_id: int) -> HttpResponse:
     vendor_obj = get_object_or_404(VendorProfile, subdomain=vendor)
     session = get_object_or_404(TryOnSession, pk=session_id, vendor=vendor_obj)
-    body = getattr(session, "body_3d", None)
+    try:
+        body = getattr(session, "body_3d", None)
+    except (OperationalError, ProgrammingError):
+        body = None
+        messages.warning(request, "3D module database tables not ready. Run migrations and reload.")
     return render(request, "tryon_3d.html", {"vendor_obj": vendor_obj, "session": session, "body": body})
 
 
@@ -401,16 +414,25 @@ def generate_3d_api(request: HttpRequest, vendor: str) -> JsonResponse:
         return JsonResponse({"ok": False, "error": "session_id required"}, status=400)
     session = get_object_or_404(TryOnSession, pk=session_id, vendor=vendor_obj)
 
-    body, _ = BodyModel3D.objects.get_or_create(
-        session=session,
-        defaults={
-            "vendor": vendor_obj,
-            "user": request.user if request.user.is_authenticated else None,
-            "status": BodyModel3D.Status.PROCESSING,
-        },
-    )
-    body.status = BodyModel3D.Status.PROCESSING
-    body.save(update_fields=["status"])
+    try:
+        body, _ = BodyModel3D.objects.get_or_create(
+            session=session,
+            defaults={
+                "vendor": vendor_obj,
+                "user": request.user if request.user.is_authenticated else None,
+                "status": BodyModel3D.Status.PROCESSING,
+            },
+        )
+        body.status = BodyModel3D.Status.PROCESSING
+        body.save(update_fields=["status"])
+    except (OperationalError, ProgrammingError):
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": "3D tables missing. Run: python manage.py migrate",
+            },
+            status=500,
+        )
 
     meta = generate_3d_body_model(Path(session.original_image.path), session=session)
     body.meta = meta or {}
