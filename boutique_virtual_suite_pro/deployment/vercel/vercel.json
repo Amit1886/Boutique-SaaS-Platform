@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "boutique_virtual_suite_pro/frontend/package.json", "use": "@vercel/static-build", "config": { "distDir": "dist" } }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "boutique_virtual_suite_pro/frontend/$1" }
+  ]
+}
+

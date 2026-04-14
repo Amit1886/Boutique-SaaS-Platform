@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bvp-primary: #db2777;
+}
+
+.glass {
+  background: color-mix(in oklab, white 70%, transparent);
+  border: 1px solid color-mix(in oklab, black 10%, transparent);
+  backdrop-filter: blur(14px);
+  box-shadow: theme(boxShadow.glass);
+}
+
+.fade-in {
+  animation: fadeIn 220ms ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+

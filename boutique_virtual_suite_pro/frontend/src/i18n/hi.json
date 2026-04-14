@@ -1,0 +1,13 @@
+{
+  "app.name": "Boutique Virtual Suite Pro",
+  "nav.home": "Home",
+  "nav.moodboard": "Moodboard",
+  "nav.trylist": "Trylist",
+  "nav.designer": "Designer",
+  "nav.styleTest": "Style Test",
+  "nav.profile": "Profile",
+  "nav.settings": "Settings",
+  "auth.login": "Login",
+  "auth.signup": "Sign up"
+}
+
