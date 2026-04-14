@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "deployhook.apps.DeployhookConfig",
     "whatsapp_bot.apps.WhatsappBotConfig",
     "wallet.apps.WalletConfig",
+    "magic_studio.apps.MagicStudioConfig",
 ]
 
 MIDDLEWARE = [
@@ -137,6 +138,9 @@ REPLICATE_API_TOKEN = os.environ.get("REPLICATE_API_TOKEN", "")
 DEFAULT_UPI_ID = os.environ.get("DEFAULT_UPI_ID", "")
 WALLET_CASHBACK_RATE = os.environ.get("WALLET_CASHBACK_RATE", "0.02")  # 2%
 WALLET_REFERRAL_BONUS = os.environ.get("WALLET_REFERRAL_BONUS", "25.00")  # INR
+
+# Magic Studio (React SPA + token-protected admin API)
+MAGIC_ADMIN_TOKEN = os.environ.get("MAGIC_ADMIN_TOKEN", os.environ.get("ADMIN_TOKEN", "change-me"))
 
 # Production hardening (safe defaults; tune via env vars)
 if not DEBUG:

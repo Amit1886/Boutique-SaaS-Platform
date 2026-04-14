@@ -26,6 +26,7 @@
         </div>
 
         <div class="flex items-center gap-2 flex-wrap justify-end">
+          <a class="navlink" href="/magic/">Magic Studio</a>
           {% if current_vendor %}
             <a class="navlink" href="{% url 'vendor_home' vendor=current_vendor.subdomain %}">Store</a>
             <a class="navlink" href="{% url 'product_list' vendor=current_vendor.subdomain category='saree' %}">Saree</a>

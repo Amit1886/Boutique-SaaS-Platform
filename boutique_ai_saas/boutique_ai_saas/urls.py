@@ -4,12 +4,15 @@ from django.contrib import admin
 from django.urls import include, path
 
 from boutique import views as boutique_views
+from magic_studio import views as magic_views
 
 urlpatterns = [
     # Important: keep custom admin pages BEFORE Django admin/, otherwise admin/ will catch them.
     path("admin/dashboard/", include("analytics.urls_admin")),
     path("admin/orders/", include("orders.urls_admin")),
     path("admin/", admin.site.urls),
+    # Magic Studio uploads (React uses absolute /uploads/* URLs)
+    path("uploads/<path:path>", magic_views.serve_upload),
     path("", boutique_views.home, name="home"),
     path("i18n/", include("django.conf.urls.i18n")),
     path("trending/", boutique_views.trending, name="trending"),
@@ -27,6 +30,7 @@ urlpatterns = [
     path("mobile_api/", include("mobile_api.urls")),
     path("deploy/", include("deployhook.urls")),
     path("whatsapp/", include("whatsapp_bot.urls")),
+    path("magic/", include("magic_studio.urls")),
     path("<slug:vendor>/", include("boutique.urls_vendor")),
 ]
 

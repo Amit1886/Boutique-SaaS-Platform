@@ -4,7 +4,7 @@ import { apiDelete, apiGet, apiPost, apiPut } from "../api/client";
 async function uploadFile(path: string, token: string, file: File, extra?: Record<string, string>) {
   const fd = new FormData();
   fd.append("file", file);
-  const url = (import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8008/api") + path;
+  const url = (import.meta.env.VITE_API_BASE_URL || "/magic/api") + path;
   const res = await fetch(url, {
     method: "POST",
     headers: { "X-Admin-Token": token, ...(extra || {}) } as any,
