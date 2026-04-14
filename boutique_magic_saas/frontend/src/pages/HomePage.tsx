@@ -64,7 +64,7 @@ export default function HomePage() {
             }}
           >
             <div className="p-4">
-              <div className="font-bold line-clamp-1">{s.name}</div>
+              <div className="font-bold truncate">{s.name}</div>
               <div className="text-sm opacity-70">₹{s.price}</div>
               <div className="mt-3 flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full" style={{ background: s.primary_color || "#db2777" }} />

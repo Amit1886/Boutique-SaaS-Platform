@@ -12,8 +12,34 @@ export default function MagicMirror({
   const [on, setOn] = useState(false);
   const [err, setErr] = useState("");
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [tiltReady, setTiltReady] = useState(false);
+  const [needsTiltPermission, setNeedsTiltPermission] = useState(false);
 
   useEffect(() => {
+    const anyWindow = window as any;
+    if (typeof anyWindow.DeviceOrientationEvent?.requestPermission === "function") {
+      setNeedsTiltPermission(true);
+    } else {
+      setTiltReady(true);
+    }
+  }, []);
+
+  async function enableTilt() {
+    const anyWindow = window as any;
+    try {
+      const res = await anyWindow.DeviceOrientationEvent.requestPermission();
+      if (res === "granted") {
+        setNeedsTiltPermission(false);
+        setTiltReady(true);
+      }
+    } catch {
+      setNeedsTiltPermission(false);
+      setTiltReady(true);
+    }
+  }
+
+  useEffect(() => {
+    if (!tiltReady) return;
     function onMove(ev: DeviceOrientationEvent) {
       const gamma = Number(ev.gamma || 0); // left/right
       const beta = Number(ev.beta || 0); // forward/back
@@ -21,7 +47,7 @@ export default function MagicMirror({
     }
     window.addEventListener("deviceorientation", onMove as any);
     return () => window.removeEventListener("deviceorientation", onMove as any);
-  }, []);
+  }, [tiltReady]);
 
   useEffect(() => {
     if (!on) return;
@@ -52,9 +78,16 @@ export default function MagicMirror({
           <div className="font-bold">Magic Mirror Mode</div>
           <div className="text-xs opacity-70">Camera overlay + CSS blend + tilt gravity</div>
         </div>
-        <button className={`btn btn-sm ${on ? "btn-primary" : ""}`} onClick={() => setOn((v) => !v)}>
-          {on ? "Stop" : "Start"}
-        </button>
+        <div className="flex items-center gap-2">
+          {needsTiltPermission ? (
+            <button className="btn btn-sm btn-ghost" onClick={enableTilt}>
+              Enable Tilt
+            </button>
+          ) : null}
+          <button className={`btn btn-sm ${on ? "btn-primary" : ""}`} onClick={() => setOn((v) => !v)}>
+            {on ? "Stop" : "Start"}
+          </button>
+        </div>
       </div>
       {err ? <div className="px-3 pb-3 text-sm text-error">{err}</div> : null}
 
@@ -95,4 +128,3 @@ export default function MagicMirror({
     </div>
   );
 }
-

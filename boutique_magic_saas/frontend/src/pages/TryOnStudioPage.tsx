@@ -20,13 +20,14 @@ export default function TryOnStudioPage() {
 
   const [jinnKey, setJinnKey] = useState("studio");
   const [bloom, setBloom] = useState(false);
-  const [ripple, setRipple] = useState<{ x: number; y: number; k: number } | null>(null);
+  const [ripple, setRipple] = useState<{ x: number; y: number; px: string; py: string; k: number } | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const isOn = useUxStore((s) => s.isOn);
   const colorBloomOn = isOn("color_bloom");
   const rippleOn = isOn("ripple_reveal");
   const [hue, setHue] = useState(0);
   const [scrollFx, setScrollFx] = useState(0);
+  const [sparkleKey, setSparkleKey] = useState(0);
 
   useEffect(() => {
     load().catch(() => {});
@@ -52,6 +53,11 @@ export default function TryOnStudioPage() {
     }
   }, [saree?.id, colorBloomOn]);
 
+  useEffect(() => {
+    if (!saree?.id) return;
+    setSparkleKey(Date.now());
+  }, [saree?.id]);
+
   const afterUrl = useMemo(() => {
     // In this system, "after" is just composited in the browser (no AI).
     return "https://picsum.photos/seed/magic_after/900/1200";
@@ -62,7 +68,11 @@ export default function TryOnStudioPage() {
     const el = stageRef.current;
     if (!el) return;
     const r = el.getBoundingClientRect();
-    setRipple({ x: e.clientX - r.left, y: e.clientY - r.top, k: Date.now() });
+    const x = e.clientX - r.left;
+    const y = e.clientY - r.top;
+    const px = `${Math.max(0, Math.min(100, (x / r.width) * 100)).toFixed(2)}%`;
+    const py = `${Math.max(0, Math.min(100, (y / r.height) * 100)).toFixed(2)}%`;
+    setRipple({ x, y, px, py, k: Date.now() });
     setJinnKey(`tap-${Date.now()}`);
   }
 
@@ -87,12 +97,31 @@ export default function TryOnStudioPage() {
             </div>
             <div ref={stageRef} onClick={onTap} className="relative aspect-[3/4] bg-base-200 overflow-hidden">
               <img src="https://picsum.photos/seed/magic_user/900/1200" className="absolute inset-0 w-full h-full object-cover" />
+              <div key={sparkleKey} className="sparkle-overlay" />
               {/* Saree overlays */}
               {saree?.layer_body_png ? (
                 <img
                   src={`${import.meta.env.VITE_UPLOAD_BASE_URL || ""}${saree.layer_body_png}`}
                   className="absolute inset-0 w-full h-full object-contain teleport aura"
                   style={{ mixBlendMode: "multiply", opacity: 0.92, filter: `hue-rotate(${hue}deg) saturate(1.15)` }}
+                />
+              ) : null}
+              {/* Pattern reveal (zoom) */}
+              {rippleOn && ripple && saree?.layer_body_png ? (
+                <img
+                  key={`reveal-${ripple.k}`}
+                  src={`${import.meta.env.VITE_UPLOAD_BASE_URL || ""}${saree.layer_body_png}`}
+                  className="absolute inset-0 w-full h-full object-contain pattern-reveal"
+                  style={
+                    {
+                      mixBlendMode: "multiply",
+                      opacity: 0.95,
+                      transform: "scale(1.18)",
+                      filter: `hue-rotate(${hue}deg) saturate(1.35) contrast(1.08)`,
+                      ["--reveal-x" as any]: ripple.px,
+                      ["--reveal-y" as any]: ripple.py
+                    } as any
+                  }
                 />
               ) : null}
               {saree?.layer_border_png ? (
