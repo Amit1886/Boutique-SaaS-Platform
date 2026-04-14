@@ -10,6 +10,7 @@
 
   {% if tailor %}
     {% include "partials/kpi_cards.html" with cards=kpi_cards %}
+    <div data-tour="kpi"></div>
     <div class="mt-6 card p-6">
       <div class="text-sm text-slate-500">Tailor</div>
       <div class="font-semibold">{{ tailor.user.username }} · {{ tailor.vendor.business_name }}</div>

@@ -18,8 +18,8 @@
           and a cinematic “Magic Studio” experience.
         </p>
         <div class="mt-6 flex flex-col sm:flex-row gap-3">
-          <a href="/magic/" class="btn-primary btn-glow">Open Magic Studio</a>
-          <a href="{% url 'demo_flow' %}" class="btn-secondary btn-glow">Run Demo Flow</a>
+          <a data-tour="magic" href="/magic/" class="btn-primary btn-glow">Open Magic Studio</a>
+          <a data-tour="demo" href="{% url 'demo_flow' %}" class="btn-secondary btn-glow">Run Demo Flow</a>
           <a href="{% url 'pricing' %}" class="btn-secondary btn-glow">Pricing</a>
         </div>
       </div>
@@ -49,6 +49,7 @@
     <div class="mt-4 glass rounded-2xl border border-slate-200/60 p-4">
       <label class="label">Search boutique</label>
       <input
+        data-tour="search"
         name="q"
         placeholder="Type vendor name…"
         class="input"

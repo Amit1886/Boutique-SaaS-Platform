@@ -8,7 +8,7 @@
         Ye page aapko poore system ka flow test karne ke liye quick links deta hai. Pehle demo data seed karo.
       </p>
 
-      <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm">
+      <div data-tour="demo-seed" class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm">
         <div class="font-semibold">Step 1 — Demo data seed</div>
         <div class="mt-2 font-mono text-xs bg-white border border-slate-200 rounded-xl p-3 overflow-auto">
           python manage.py migrate<br/>
@@ -86,7 +86,7 @@
         </div>
       </div>
 
-      <div class="mt-6 grid sm:grid-cols-2 gap-3">
+      <div data-tour="demo-links" class="mt-6 grid sm:grid-cols-2 gap-3">
         <a class="btn-primary text-center" href="/admin/">1) Django Admin</a>
         <a class="btn-secondary text-center" href="/pricing/">2) SaaS Pricing</a>
         <a class="btn-secondary text-center" href="/demo/">3) Demo Vendor Store</a>
