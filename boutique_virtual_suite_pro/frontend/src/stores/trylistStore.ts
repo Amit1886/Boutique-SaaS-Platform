@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { apiFetch } from "../api/client";
 import { cacheGet, cacheSet } from "../lib/cache";
 import type { Product } from "./productStore";
+import { useUIStore } from "./uiStore";
 
 type TryItem = { product_id: number; position: number; product: Product | null };
 
@@ -31,10 +32,12 @@ export const useTrylistStore = create<TrylistState>((set, get) => ({
     await apiFetch("/trylist/add", { method: "POST", body: JSON.stringify({ product_id: productId }) });
     await get().load();
     set({ open: true });
+    useUIStore.getState().toast({ kind: "success", title: "Added to Trylist" });
   },
   remove: async (productId) => {
     await apiFetch("/trylist/remove", { method: "POST", body: JSON.stringify({ product_id: productId }) });
     await get().load();
+    useUIStore.getState().toast({ kind: "info", title: "Removed from Trylist" });
   },
   move: (productId, dir) => {
     const items = [...get().items].sort((a, b) => a.position - b.position);

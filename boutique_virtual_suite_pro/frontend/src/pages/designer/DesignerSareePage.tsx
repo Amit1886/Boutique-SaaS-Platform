@@ -14,7 +14,7 @@ export default function DesignerSareePage() {
   }, [loadAll]);
   const sarees = useMemo(() => products.filter((p) => p.category === "saree").slice(0, 12), [products]);
   return (
-    <DesignerFlowShell title="Step 1: Saree selection">
+    <DesignerFlowShell title="Step 1: Saree selection" activeStep={1}>
       <div className="grid lg:grid-cols-[1fr_360px] gap-4 items-start">
         <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-4">
           {sarees.map((p) => (

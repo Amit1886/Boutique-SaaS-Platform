@@ -14,7 +14,7 @@ export default function DesignerJewelryPage() {
   }, [loadAll]);
   const jewelry = useMemo(() => products.filter((p) => p.category === "jewelry").slice(0, 12), [products]);
   return (
-    <DesignerFlowShell title="Step 4: Jewelry selection">
+    <DesignerFlowShell title="Step 4: Jewelry selection" activeStep={4}>
       <div className="grid lg:grid-cols-[1fr_360px] gap-4 items-start">
         <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-4">
           {jewelry.map((p) => (

@@ -3,6 +3,7 @@ import Sidebar from "./Sidebar";
 import BottomNav from "./BottomNav";
 import TrylistDrawer from "./TrylistDrawer";
 import TopBar from "./TopBar";
+import Toasts from "./Toasts";
 import { I18nProvider } from "../i18n/i18n";
 import { useSettingsStore } from "../stores/settingsStore";
 import { useMoodStore } from "../stores/moodStore";
@@ -37,6 +38,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <I18nProvider>
       <div className="min-h-screen bg-base-200 text-base-content">
         <TopBar />
+        <Toasts />
         <div className="max-w-7xl mx-auto px-3 md:px-6 py-5 grid md:grid-cols-[260px_1fr] gap-5">
           <div className="hidden md:block">
             <Sidebar />

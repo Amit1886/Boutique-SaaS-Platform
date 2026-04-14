@@ -1,4 +1,5 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import Layout from "./components/Layout";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
@@ -10,6 +11,8 @@ import ResultsPage from "./pages/ResultsPage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
 import FavoritesPage from "./pages/FavoritesPage";
+import ProductListingPage from "./pages/ProductListingPage";
+import DashboardPage from "./pages/DashboardPage";
 import DesignerSareePage from "./pages/designer/DesignerSareePage";
 import DesignerBlousePage from "./pages/designer/DesignerBlousePage";
 import DesignerAccessoriesPage from "./pages/designer/DesignerAccessoriesPage";
@@ -17,26 +20,39 @@ import DesignerJewelryPage from "./pages/designer/DesignerJewelryPage";
 import FinalPreviewPage from "./pages/FinalPreviewPage";
 
 export default function App() {
+  const location = useLocation();
   return (
     <Layout>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
-        <Route path="/moodboard" element={<MoodboardPage />} />
-        <Route path="/trylist" element={<TrylistPage />} />
-        <Route path="/favorites" element={<FavoritesPage />} />
-        <Route path="/designer-flow/saree" element={<DesignerSareePage />} />
-        <Route path="/designer-flow/blouse" element={<DesignerBlousePage />} />
-        <Route path="/designer-flow/accessories" element={<DesignerAccessoriesPage />} />
-        <Route path="/designer-flow/jewelry" element={<DesignerJewelryPage />} />
-        <Route path="/final-preview" element={<FinalPreviewPage />} />
-        <Route path="/style-test" element={<StyleTestPage />} />
-        <Route path="/results" element={<ResultsPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/settings" element={<SettingsPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={location.pathname}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.18, ease: "easeOut" }}
+        >
+          <Routes location={location}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/moodboard" element={<MoodboardPage />} />
+            <Route path="/products" element={<ProductListingPage />} />
+            <Route path="/trylist" element={<TrylistPage />} />
+            <Route path="/favorites" element={<FavoritesPage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/designer-flow/saree" element={<DesignerSareePage />} />
+            <Route path="/designer-flow/blouse" element={<DesignerBlousePage />} />
+            <Route path="/designer-flow/accessories" element={<DesignerAccessoriesPage />} />
+            <Route path="/designer-flow/jewelry" element={<DesignerJewelryPage />} />
+            <Route path="/final-preview" element={<FinalPreviewPage />} />
+            <Route path="/style-test" element={<StyleTestPage />} />
+            <Route path="/results" element={<ResultsPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </motion.div>
+      </AnimatePresence>
     </Layout>
   );
 }

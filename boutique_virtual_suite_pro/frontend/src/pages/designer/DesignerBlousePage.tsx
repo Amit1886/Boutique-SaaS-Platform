@@ -14,7 +14,7 @@ export default function DesignerBlousePage() {
   }, [loadAll]);
   const blouses = useMemo(() => products.filter((p) => p.category === "blouse").slice(0, 12), [products]);
   return (
-    <DesignerFlowShell title="Step 2: Blouse selection">
+    <DesignerFlowShell title="Step 2: Blouse selection" activeStep={2}>
       <div className="grid lg:grid-cols-[1fr_360px] gap-4 items-start">
         <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-4">
           {blouses.map((p) => (

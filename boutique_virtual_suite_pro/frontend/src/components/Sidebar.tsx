@@ -4,10 +4,12 @@ import { useI18n } from "../i18n/i18n";
 const links = [
   { to: "/", key: "nav.home" },
   { to: "/moodboard", key: "nav.moodboard" },
+  { to: "/products", key: "Products" },
   { to: "/designer-flow/saree", key: "nav.designer" },
   { to: "/style-test", key: "nav.styleTest" },
   { to: "/trylist", key: "nav.trylist" },
   { to: "/favorites", key: "nav.favorites" },
+  { to: "/dashboard", key: "Dashboard" },
   { to: "/profile", key: "nav.profile" },
   { to: "/settings", key: "nav.settings" }
 ];
@@ -26,7 +28,7 @@ export default function Sidebar() {
               `px-3 py-2 rounded-xl transition ${isActive ? "bg-primary text-primary-content" : "hover:bg-base-300/60"}`
             }
           >
-            {t(l.key)}
+            {l.key.startsWith("nav.") ? t(l.key) : l.key}
           </NavLink>
         ))}
       </div>

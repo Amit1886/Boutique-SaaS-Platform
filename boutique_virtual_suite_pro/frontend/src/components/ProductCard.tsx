@@ -16,7 +16,7 @@ export default function ProductCard({ p }: { p: Product }) {
   return (
     <div className="rounded-2xl border border-base-300 bg-base-100 overflow-hidden">
       <div className="relative">
-        <img ref={imgRef} src={p.image_url} className="w-full h-56 object-cover" />
+        <img ref={imgRef} src={p.image_url} className="w-full h-56 object-cover" loading="lazy" />
         <div className="absolute top-2 left-2 badge badge-primary">{p.mood_tag || "Mood"}</div>
         <button
           className={`absolute top-2 right-2 btn btn-xs ${isFav ? "btn-primary" : "btn-ghost"}`}

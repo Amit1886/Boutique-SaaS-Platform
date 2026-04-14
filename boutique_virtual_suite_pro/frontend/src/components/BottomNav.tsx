@@ -3,9 +3,9 @@ import { NavLink } from "react-router-dom";
 const items = [
   { to: "/", label: "Home" },
   { to: "/moodboard", label: "Mood" },
+  { to: "/products", label: "Shop" },
   { to: "/designer-flow/saree", label: "Flow" },
-  { to: "/trylist", label: "Trylist" },
-  { to: "/settings", label: "Settings" }
+  { to: "/trylist", label: "Try" }
 ];
 
 export default function BottomNav() {
@@ -25,4 +25,3 @@ export default function BottomNav() {
     </div>
   );
 }
-

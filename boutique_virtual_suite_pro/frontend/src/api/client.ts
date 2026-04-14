@@ -1,18 +1,19 @@
-import { useAuthStore } from "../stores/authStore";
-
-const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:5000/api";
+import { http } from "./http";
 
 export async function apiFetch<T>(path: string, opts: RequestInit = {}): Promise<T> {
-  const token = useAuthStore.getState().token;
-  const headers = new Headers(opts.headers || {});
-  headers.set("Content-Type", "application/json");
-  if (token) headers.set("Authorization", `Bearer ${token}`);
-  const res = await fetch(`${baseUrl}${path}`, { ...opts, headers });
-  const json = await res.json().catch(() => ({}));
-  if (!res.ok || (json && json.ok === false)) {
-    const msg = (json && json.error) || `Request failed (${res.status})`;
-    throw new Error(msg);
+  const method = (opts.method || "GET").toUpperCase();
+  let data: any = undefined;
+  if (opts.body) {
+    try {
+      data = JSON.parse(String(opts.body));
+    } catch {
+      data = opts.body;
+    }
   }
-  return json as T;
+  if (method === "GET") {
+    const res = await http.get<T>(path);
+    return res.data as any;
+  }
+  const res = await http.request<T>({ url: path, method, data });
+  return res.data as any;
 }
-

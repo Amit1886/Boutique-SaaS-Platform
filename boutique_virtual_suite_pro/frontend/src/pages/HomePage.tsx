@@ -18,6 +18,7 @@ export default function HomePage() {
   const activeMoodKey = useMoodStore((s) => s.activeKey);
   const moods = useMoodStore((s) => s.moods);
   const [personal, setPersonal] = React.useState<any[]>(cacheGet<any[]>("bvp.feed.personal") || []);
+  const [moodPicks, setMoodPicks] = React.useState<any[]>(cacheGet<any[]>("bvp.feed.mood") || []);
 
   useEffect(() => {
     loadMoods().catch(() => {});
@@ -35,7 +36,16 @@ export default function HomePage() {
   }, [token]);
 
   const moodName = (moods.find((m) => m.key === activeMoodKey)?.name_en || "").trim();
-  const moodRecommended = moodName ? products.filter((p) => (p.mood_tag || "").includes(moodName)).slice(0, 12) : [];
+
+  useEffect(() => {
+    if (!moodName) return;
+    apiFetch<{ ok: true; products: any[] }>(`/products/by-mood?mood=${encodeURIComponent(moodName)}`, { method: "GET" })
+      .then((r) => {
+        cacheSet("bvp.feed.mood", r.products || [], 1000 * 60 * 5);
+        setMoodPicks(r.products || []);
+      })
+      .catch(() => {});
+  }, [moodName]);
 
   return (
     <div className="space-y-6 fade-in">
@@ -61,14 +71,14 @@ export default function HomePage() {
         </>
       ) : null}
 
-      {moodRecommended.length ? (
+      {moodPicks.length ? (
         <>
           <div className="flex items-center justify-between">
             <div className="text-lg font-bold">Mood picks</div>
             <div className="text-xs opacity-60">{moodName}</div>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {moodRecommended.map((p) => (
+            {moodPicks.slice(0, 12).map((p) => (
               <ProductCard key={p.id} p={p} />
             ))}
           </div>

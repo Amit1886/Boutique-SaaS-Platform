@@ -3,6 +3,7 @@ import { apiFetch } from "../api/client";
 import { cacheGet, cacheSet } from "../lib/cache";
 import { useAuthStore } from "./authStore";
 import type { Product } from "./productStore";
+import { useUIStore } from "./uiStore";
 
 type FavRow = { product_id: number; product: Product | null };
 
@@ -42,9 +43,11 @@ export const useFavoritesStore = create<FavoritesState>((set, get) => ({
     if (has) {
       await apiFetch("/favorites/remove", { method: "POST", body: JSON.stringify({ product_id: productId }) });
       ids.delete(productId);
+      useUIStore.getState().toast({ kind: "info", title: "Removed from Favorites" });
     } else {
       await apiFetch("/favorites/add", { method: "POST", body: JSON.stringify({ product_id: productId }) });
       ids.add(productId);
+      useUIStore.getState().toast({ kind: "success", title: "Saved to Favorites" });
     }
     cacheSet("bvp.fav.ids", Array.from(ids), 1000 * 60 * 60);
     set({ ids });
@@ -52,4 +55,3 @@ export const useFavoritesStore = create<FavoritesState>((set, get) => ({
     get().load().catch(() => {});
   }
 }));
-

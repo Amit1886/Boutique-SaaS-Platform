@@ -14,7 +14,7 @@ export default function DesignerAccessoriesPage() {
   }, [loadAll]);
   const accessories = useMemo(() => products.filter((p) => p.category === "accessories").slice(0, 12), [products]);
   return (
-    <DesignerFlowShell title="Step 3: Accessories selection">
+    <DesignerFlowShell title="Step 3: Accessories selection" activeStep={3}>
       <div className="grid lg:grid-cols-[1fr_360px] gap-4 items-start">
         <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-4">
           {accessories.map((p) => (
