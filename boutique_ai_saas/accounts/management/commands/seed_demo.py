@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import secrets
 from dataclasses import dataclass
+from datetime import date
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
