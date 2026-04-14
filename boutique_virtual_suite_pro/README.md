@@ -51,9 +51,15 @@ Frontend runs at `http://127.0.0.1:5173`.
 - `GET /api/auth/user`
 - `GET /api/mood/list`
 - `POST /api/mood/apply`
+- `GET /api/favorites/all`
+- `POST /api/favorites/add`
+- `POST /api/favorites/remove`
 - `POST /api/trylist/add`
 - `POST /api/trylist/remove`
 - `GET /api/trylist/all`
+- `POST /api/trylist/reorder`
+- `GET /api/designer/progress`
+- `POST /api/designer/progress`
 - `GET /api/style/test/questions`
 - `POST /api/style/test/submit`
 - `GET /api/style/personality`
@@ -61,4 +67,3 @@ Frontend runs at `http://127.0.0.1:5173`.
 - `GET /api/products/by-mood?mood=...`
 - `GET /api/products/by-style?style=...`
 - `GET /api/feed/personalized`
-

@@ -95,3 +95,9 @@ class UserFeed(db.Model, TimestampMixin):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
     product_ids = db.Column(db.JSON, default=list, nullable=False)
 
+
+class DesignerProgress(db.Model, TimestampMixin):
+    __tablename__ = "designer_progress"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), unique=True, nullable=False, index=True)
+    progress = db.Column(db.JSON, default=dict, nullable=False)

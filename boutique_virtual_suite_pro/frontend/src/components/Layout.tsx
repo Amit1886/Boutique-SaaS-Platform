@@ -6,10 +6,16 @@ import TopBar from "./TopBar";
 import { I18nProvider } from "../i18n/i18n";
 import { useSettingsStore } from "../stores/settingsStore";
 import { useMoodStore } from "../stores/moodStore";
+import { useDesignerStore } from "../stores/designerStore";
+import { useAuthStore } from "../stores/authStore";
+import { useFavoritesStore } from "../stores/favoritesStore";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const theme = useSettingsStore((s) => s.theme);
   const moodColor = useMoodStore((s) => s.themeColor);
+  const hydrateDesigner = useDesignerStore((s) => s.hydrateFromServer);
+  const loadFavs = useFavoritesStore((s) => s.load);
+  const token = useAuthStore((s) => s.token);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -18,6 +24,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     document.documentElement.style.setProperty("--bvp-primary", moodColor || "#db2777");
   }, [moodColor]);
+
+  useEffect(() => {
+    if (token) hydrateDesigner().catch(() => {});
+  }, [token, hydrateDesigner]);
+
+  useEffect(() => {
+    if (token) loadFavs().catch(() => {});
+  }, [token, loadFavs]);
 
   return (
     <I18nProvider>
@@ -35,4 +49,3 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     </I18nProvider>
   );
 }
-

@@ -7,6 +7,7 @@ const links = [
   { to: "/designer-flow/saree", key: "nav.designer" },
   { to: "/style-test", key: "nav.styleTest" },
   { to: "/trylist", key: "nav.trylist" },
+  { to: "/favorites", key: "nav.favorites" },
   { to: "/profile", key: "nav.profile" },
   { to: "/settings", key: "nav.settings" }
 ];
@@ -32,4 +33,3 @@ export default function Sidebar() {
     </div>
   );
 }
-

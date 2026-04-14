@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { apiFetch } from "../api/client";
 import { useAuthStore } from "../stores/authStore";
 import { useNavigate } from "react-router-dom";
+import { cacheSet } from "../lib/cache";
 
 type Q = { id: string; title_en: string; title_hi: string; choices: { key: string; label_en: string; label_hi: string }[] };
 
@@ -29,6 +30,7 @@ export default function StyleTestPage() {
         body: JSON.stringify({ answers })
       });
       sessionStorage.setItem("bvp.personality.latest", res.result.personality);
+      cacheSet("bvp.feed.personal", [], 1);
       nav("/results");
     } catch (e: any) {
       setErr(e?.message || "Failed");
@@ -66,4 +68,3 @@ export default function StyleTestPage() {
     </div>
   );
 }
-

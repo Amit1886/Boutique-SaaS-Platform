@@ -9,6 +9,7 @@ import StyleTestPage from "./pages/StyleTestPage";
 import ResultsPage from "./pages/ResultsPage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
+import FavoritesPage from "./pages/FavoritesPage";
 import DesignerSareePage from "./pages/designer/DesignerSareePage";
 import DesignerBlousePage from "./pages/designer/DesignerBlousePage";
 import DesignerAccessoriesPage from "./pages/designer/DesignerAccessoriesPage";
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/moodboard" element={<MoodboardPage />} />
         <Route path="/trylist" element={<TrylistPage />} />
+        <Route path="/favorites" element={<FavoritesPage />} />
         <Route path="/designer-flow/saree" element={<DesignerSareePage />} />
         <Route path="/designer-flow/blouse" element={<DesignerBlousePage />} />
         <Route path="/designer-flow/accessories" element={<DesignerAccessoriesPage />} />
@@ -38,4 +40,3 @@ export default function App() {
     </Layout>
   );
 }
-
