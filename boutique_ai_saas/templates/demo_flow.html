@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Demo Flow · Boutique AI SaaS{% endblock %}
+{% block content %}
+  <div class="max-w-3xl">
+    <div class="card p-6">
+      <h1 class="text-2xl md:text-3xl font-extrabold">Demo Flow (1 click testing)</h1>
+      <p class="mt-2 text-slate-600">
+        Ye page aapko poore system ka flow test karne ke liye quick links deta hai. Pehle demo data seed karo.
+      </p>
+
+      <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm">
+        <div class="font-semibold">Step 1 — Demo data seed</div>
+        <div class="mt-2 font-mono text-xs bg-white border border-slate-200 rounded-xl p-3 overflow-auto">
+          python manage.py migrate<br/>
+          python manage.py seed_demo --password Demo@12345
+        </div>
+        <div class="mt-2 text-slate-600">
+          (Password change karna ho to apna set kar lo. Command output me users show ho jayenge.)
+        </div>
+      </div>
+
+      <div class="mt-6 grid sm:grid-cols-2 gap-3">
+        <a class="btn-primary text-center" href="/admin/">1) Django Admin</a>
+        <a class="btn-secondary text-center" href="/pricing/">2) SaaS Pricing</a>
+        <a class="btn-secondary text-center" href="/demo/">3) Demo Vendor Store</a>
+        <a class="btn-secondary text-center" href="/demo/tryon/upload/">4) Vendor Try-On Flow</a>
+        <a class="btn-secondary text-center" href="/favorites/">5) Favorites + Saved Looks</a>
+        <a class="btn-secondary text-center" href="/trending/">6) Trending</a>
+        <a class="btn-secondary text-center" href="/accounts/dashboard/">7) Customer Dashboard</a>
+        <a class="btn-secondary text-center" href="/vendor/">8) Vendor Dashboard</a>
+        <a class="btn-secondary text-center" href="/tailor/">9) Tailor Dashboard</a>
+        <a class="btn-secondary text-center" href="/wallet/">10) Wallet</a>
+        <a class="btn-secondary text-center" href="/magic/">11) Magic Studio (React)</a>
+        <a class="btn-secondary text-center" href="/api/">12) REST API</a>
+      </div>
+
+      <div class="mt-6 text-sm text-slate-600">
+        <div class="font-semibold text-slate-800">Expected Demo Users</div>
+        <ul class="list-disc pl-5 mt-2 space-y-1">
+          <li><span class="font-mono">demo_admin</span> (superuser)</li>
+          <li><span class="font-mono">demo_vendor</span></li>
+          <li><span class="font-mono">demo_tailor</span></li>
+          <li><span class="font-mono">demo_customer</span></li>
+        </ul>
+      </div>
+
+      <div class="mt-6 text-xs text-slate-500">
+        Tip: Agar <span class="font-mono">/magic/</span> pe "SPA not built yet" aaye, to 1 baar build karo:
+        <span class="font-mono">cd boutique_magic_saas/frontend && npm install && npm run build</span>
+      </div>
+    </div>
+  </div>
+{% endblock %}

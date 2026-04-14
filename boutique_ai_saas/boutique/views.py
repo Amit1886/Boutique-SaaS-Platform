@@ -66,6 +66,11 @@ def trending(request: HttpRequest) -> HttpResponse:
 
 
 @require_http_methods(["GET"])
+def demo_flow(request: HttpRequest) -> HttpResponse:
+    return render(request, "demo_flow.html", {})
+
+
+@require_http_methods(["GET"])
 def favorites(request: HttpRequest) -> HttpResponse:
     if not request.user.is_authenticated:
         return redirect("login")

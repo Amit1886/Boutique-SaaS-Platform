@@ -14,6 +14,7 @@ urlpatterns = [
     # Magic Studio uploads (React uses absolute /uploads/* URLs)
     path("uploads/<path:path>", magic_views.serve_upload),
     path("", boutique_views.home, name="home"),
+    path("demo-flow/", boutique_views.demo_flow, name="demo_flow"),
     path("i18n/", include("django.conf.urls.i18n")),
     path("trending/", boutique_views.trending, name="trending"),
     path("favorites/", boutique_views.favorites, name="favorites"),
