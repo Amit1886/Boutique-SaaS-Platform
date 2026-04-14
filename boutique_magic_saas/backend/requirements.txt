@@ -1,0 +1,9 @@
+fastapi==0.115.6
+uvicorn==0.30.6
+python-multipart==0.0.9
+sqlmodel==0.0.22
+alembic==1.13.2
+Pillow==10.4.0
+a2wsgi==1.10.8
+python-dotenv==1.0.1
+
