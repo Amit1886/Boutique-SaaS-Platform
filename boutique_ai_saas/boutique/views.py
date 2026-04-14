@@ -71,6 +71,16 @@ def demo_flow(request: HttpRequest) -> HttpResponse:
 
 
 @require_http_methods(["GET"])
+def vendors_partial(request: HttpRequest) -> HttpResponse:
+    q = (request.GET.get("q") or "").strip()
+    qs = VendorProfile.objects.select_related("plan").order_by("business_name")
+    if q:
+        qs = qs.filter(business_name__icontains=q)
+    vendors = qs[:30]
+    return render(request, "partials/vendors_grid.html", {"vendors": vendors})
+
+
+@require_http_methods(["GET"])
 def favorites(request: HttpRequest) -> HttpResponse:
     if not request.user.is_authenticated:
         return redirect("login")

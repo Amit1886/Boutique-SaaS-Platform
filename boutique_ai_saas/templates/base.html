@@ -5,21 +5,27 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{% block title %}Boutique AI SaaS{% endblock %}</title>
+    <script>
+      tailwind = { config: { darkMode: "class" } };
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/magic_ui.css' %}" />
     <style>
       :root { --vendor-theme: {{ vendor_theme_color|default:"#db2777" }}; }
     </style>
   </head>
-  <body class="min-h-screen bg-slate-50 text-slate-900">
-    <nav class="bg-white/90 backdrop-blur border-b border-slate-200 sticky top-0 z-50">
+  <body class="min-h-screen text-slate-900 dark:text-slate-100" x-data>
+    <nav class="bg-white/90 dark:bg-slate-950/60 backdrop-blur border-b border-slate-200 dark:border-white/10 sticky top-0 z-50">
       <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
         <div class="flex items-center gap-3">
           <a href="{% url 'home' %}" class="font-extrabold tracking-tight text-lg">
             Boutique<span class="text-[color:var(--vendor-theme)]">AI</span>
           </a>
           {% if current_vendor %}
-            <span class="text-xs px-2 py-1 rounded-full border border-slate-200 bg-slate-50">
+            <span class="text-xs px-2 py-1 rounded-full border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5">
               {{ current_vendor.business_name }}
             </span>
           {% endif %}
@@ -51,6 +57,8 @@
           {% else %}
             <a class="navlink" href="{% url 'login' %}">Login</a>
           {% endif %}
+
+          <button data-theme-toggle class="btn-secondary btn-glow text-sm">Theme</button>
         </div>
       </div>
     </nav>
@@ -89,5 +97,6 @@
     <script src="{% static 'js/template_selector.js' %}"></script>
     <script src="{% static 'js/measurement_ai.js' %}"></script>
     <script src="{% static 'js/ar_tryon.js' %}"></script>
+    <script src="{% static 'js/magic_ui.js' %}"></script>
   </body>
 </html>

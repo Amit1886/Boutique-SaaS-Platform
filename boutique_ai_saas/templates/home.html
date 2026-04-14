@@ -1,31 +1,40 @@
 {% extends "base.html" %}
 {% block title %}Boutique AI SaaS{% endblock %}
 {% block content %}
-  <section class="rounded-3xl overflow-hidden bg-gradient-to-r from-slate-900 via-indigo-900 to-pink-700 text-white">
-    <div class="px-8 py-12 md:px-12 md:py-16 grid md:grid-cols-2 gap-10 items-center">
+  <section class="rounded-3xl overflow-hidden glass neon-ring relative">
+    <div class="absolute inset-0 opacity-80 shine"></div>
+    <div class="px-8 py-12 md:px-12 md:py-16 grid md:grid-cols-2 gap-10 items-center relative">
       <div>
-        <h1 class="text-3xl md:text-5xl font-extrabold leading-tight">
+        <div class="inline-flex items-center gap-2 text-xs uppercase tracking-wider text-slate-800/70 flex-wrap">
+          <span class="px-2 py-1 rounded-full border border-slate-200 bg-white/60">Premium SaaS</span>
+          <span class="px-2 py-1 rounded-full border border-slate-200 bg-white/60">No-reload UX</span>
+          <span class="px-2 py-1 rounded-full border border-slate-200 bg-white/60">Magic Studio</span>
+        </div>
+        <h1 class="mt-3 text-3xl md:text-5xl font-extrabold leading-tight text-slate-900 dark:text-white">
           Boutique AI SaaS Platform
         </h1>
-        <p class="mt-4 text-white/90 text-lg">
-          Multi-vendor boutiques with AI try-on (2D/3D/AR placeholders), tailoring workflow, POS, inventory, subscriptions, branding, and mobile APIs.
+        <p class="mt-4 text-slate-700 dark:text-slate-200 text-lg">
+          Multi-vendor boutiques with Try-On (2D/3D/AR), tailoring workflow, POS, inventory, subscriptions, branding,
+          and a cinematic “Magic Studio” experience.
         </p>
         <div class="mt-6 flex flex-col sm:flex-row gap-3">
-          <a href="{% url 'pricing' %}" class="btn-primary bg-white text-slate-900 hover:bg-white/90">View Pricing</a>
-          <a href="{% url 'signup_vendor' %}" class="btn-secondary border-white/30 text-white hover:bg-white/10">Start as Vendor</a>
+          <a href="/magic/" class="btn-primary btn-glow">Open Magic Studio</a>
+          <a href="{% url 'demo_flow' %}" class="btn-secondary btn-glow">Run Demo Flow</a>
+          <a href="{% url 'pricing' %}" class="btn-secondary btn-glow">Pricing</a>
         </div>
       </div>
+
       <div class="hidden md:block">
-        <div class="rounded-2xl bg-white/10 border border-white/15 p-6">
-          <div class="text-sm uppercase tracking-wider text-white/80">48 Modules Included</div>
-          <div class="mt-4 grid grid-cols-2 gap-3 text-sm text-white/90">
+        <div class="rounded-2xl glass border border-slate-200/60 p-6">
+          <div class="text-sm uppercase tracking-wider text-slate-800/70 dark:text-slate-200/70">48 Modules Included</div>
+          <div class="mt-4 grid grid-cols-2 gap-3 text-sm text-slate-800/80 dark:text-slate-100/80">
             <div class="pill">2D Try-On</div><div class="pill">AR Mirror</div>
             <div class="pill">3D Try-On</div><div class="pill">Measurements AI</div>
             <div class="pill">Tailor Tasks</div><div class="pill">Blueprints</div>
             <div class="pill">Inventory</div><div class="pill">POS Billing</div>
             <div class="pill">WhatsApp Bot</div><div class="pill">Order Tracking</div>
           </div>
-          <div class="mt-5 text-xs text-white/70">AI/Payments are dummy hooks with TODOs for real integrations.</div>
+          <div class="mt-5 text-xs text-slate-700/70 dark:text-slate-200/70">AI/Payments are hooks; integrate real APIs anytime.</div>
         </div>
       </div>
     </div>
@@ -36,28 +45,25 @@
       <h2 class="text-xl md:text-2xl font-bold">Explore vendor boutiques</h2>
       <a class="text-sm text-pink-700 hover:underline" href="{% url 'pricing' %}">Subscribe →</a>
     </div>
+
+    <div class="mt-4 glass rounded-2xl border border-slate-200/60 p-4">
+      <label class="label">Search boutique</label>
+      <input
+        name="q"
+        placeholder="Type vendor name…"
+        class="input"
+        hx-get="/partials/vendors/"
+        hx-trigger="keyup changed delay:250ms"
+        hx-target="#vendorsGrid"
+        hx-indicator="#vendorsLoading"
+      />
+      <div id="vendorsLoading" class="mt-2 text-xs text-slate-500 hidden">Searching…</div>
+    </div>
+
     <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-      {% for v in vendors %}
-        <a href="/{{ v.subdomain }}/" class="card p-5 hover:shadow-md transition">
-          <div class="flex items-center gap-3">
-            <div class="h-10 w-10 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center font-bold" style="color: {{ v.theme_color }};">
-              {{ v.business_name|slice:":1" }}
-            </div>
-            <div>
-              <div class="font-semibold">{{ v.business_name }}</div>
-              <div class="text-sm text-slate-600">/{{ v.subdomain }}/ · {{ v.plan.name|default:"Plan" }}</div>
-            </div>
-          </div>
-          <div class="mt-4 text-sm text-slate-700">
-            Try virtual try-on and place tailoring orders.
-          </div>
-          <div class="mt-4 inline-flex items-center gap-2 text-sm font-semibold" style="color: {{ v.theme_color }};">
-            Visit store <span>→</span>
-          </div>
-        </a>
-      {% empty %}
-        <div class="text-slate-600">No vendors yet. Create one via “Become a Vendor”.</div>
-      {% endfor %}
+      <div id="vendorsGrid" class="contents">
+        {% include "partials/vendors_grid.html" with vendors=vendors %}
+      </div>
     </div>
   </section>
 
@@ -69,7 +75,7 @@
       </div>
       <div class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
         {% for t in personal_feed %}
-          <a href="/{{ t.vendor.subdomain }}/" class="card p-3 hover:shadow-md transition">
+          <a href="/{{ t.vendor.subdomain }}/" class="card p-3 hover:shadow-md transition glass">
             <img src="{{ t.image.url }}" alt="{{ t.name }}" class="w-full h-36 object-cover rounded-xl border border-slate-200" />
             <div class="mt-2 text-sm font-semibold truncate">{{ t.name }}</div>
             <div class="text-xs text-slate-600">/{{ t.vendor.subdomain }}/</div>
@@ -88,7 +94,7 @@
       <div class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
         {% for row in trending %}
           {% with t=row.template %}
-            <a href="/{{ t.vendor.subdomain }}/" class="card p-3 hover:shadow-md transition">
+            <a href="/{{ t.vendor.subdomain }}/" class="card p-3 hover:shadow-md transition glass">
               <img src="{{ t.image.url }}" alt="{{ t.name }}" class="w-full h-36 object-cover rounded-xl border border-slate-200" />
               <div class="mt-2 flex items-center justify-between gap-3">
                 <div class="text-sm font-semibold truncate">{{ t.name }}</div>
