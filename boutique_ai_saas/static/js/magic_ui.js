@@ -95,8 +95,58 @@
     });
   }
 
+  function showLoader() {
+    const el = document.getElementById("pageLoader");
+    if (!el) return;
+    el.classList.remove("hidden");
+  }
+
+  function hideLoader() {
+    const el = document.getElementById("pageLoader");
+    if (!el) return;
+    el.classList.add("hidden");
+  }
+
+  function initLoader() {
+    // Normal navigation
+    document.addEventListener(
+      "click",
+      (e) => {
+        const a = e.target && e.target.closest ? e.target.closest("a") : null;
+        if (!a) return;
+        const href = a.getAttribute("href") || "";
+        if (!href || href.startsWith("#") || href.startsWith("javascript:")) return;
+        if (a.getAttribute("target") === "_blank") return;
+        // Only internal navigations
+        if (href.startsWith("http") && !href.startsWith(window.location.origin)) return;
+        showLoader();
+      },
+      { capture: true }
+    );
+
+    // Forms
+    document.addEventListener(
+      "submit",
+      (e) => {
+        const form = e.target;
+        if (!form) return;
+        showLoader();
+      },
+      { capture: true }
+    );
+
+    // HTMX
+    document.body.addEventListener("htmx:beforeRequest", showLoader);
+    document.body.addEventListener("htmx:afterRequest", hideLoader);
+    document.body.addEventListener("htmx:responseError", hideLoader);
+    document.body.addEventListener("htmx:sendError", hideLoader);
+
+    window.addEventListener("pageshow", hideLoader);
+  }
+
   initTheme();
   initToggles();
   document.addEventListener("click", addRipple, { passive: true });
   initJinnTriggers();
+  initLoader();
 })();

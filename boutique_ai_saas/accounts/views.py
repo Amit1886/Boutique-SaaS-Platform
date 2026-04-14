@@ -97,4 +97,10 @@ def customer_dashboard(request):
     looks = SavedLook.objects.filter(user=request.user).select_related("vendor").order_by("-id")[:100]
     orders = Order.objects.filter(user=request.user).select_related("vendor", "product").order_by("-id")[:100]
     wallet = get_or_create_wallet(request.user)
-    return render(request, "customer_dashboard.html", {"looks": looks, "orders": orders, "wallet": wallet})
+    kpi_cards = [
+        {"label": "Wallet", "value": int(wallet.balance or 0), "prefix": "₹", "hint": "Balance"},
+        {"label": "Orders", "value": len(orders), "hint": "Recent"},
+        {"label": "Saved Looks", "value": len(looks), "hint": "Your gallery"},
+        {"label": "Favorites", "value": request.user.favorites.count(), "hint": "Templates"},
+    ]
+    return render(request, "customer_dashboard.html", {"looks": looks, "orders": orders, "wallet": wallet, "kpi_cards": kpi_cards})

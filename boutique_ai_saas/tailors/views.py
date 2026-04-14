@@ -19,8 +19,21 @@ def tailor_dashboard(request):
         messages.error(request, "Tailor profile not found.")
         return redirect("home")
 
-    tasks = TailorTask.objects.filter(tailor=tailor).select_related("order", "order__product").order_by("-id")[:200]
-    return render(request, "dashboard_tailor.html", {"tailor": tailor, "tasks": tasks})
+    tasks_qs = TailorTask.objects.filter(tailor=tailor).select_related("order", "order__product").order_by("-id")
+    tasks = tasks_qs[:200]
+    stats = {
+        "total": tasks_qs.count(),
+        "pending": tasks_qs.filter(status=TaskStatus.PENDING).count(),
+        "in_progress": tasks_qs.filter(status=TaskStatus.IN_PROGRESS).count(),
+        "done": tasks_qs.filter(status=TaskStatus.DONE).count(),
+    }
+    kpi_cards = [
+        {"label": "Total Tasks", "value": stats["total"], "hint": "All time"},
+        {"label": "Pending", "value": stats["pending"], "hint": "To start"},
+        {"label": "In Progress", "value": stats["in_progress"], "hint": "Ongoing"},
+        {"label": "Done", "value": stats["done"], "hint": "Completed"},
+    ]
+    return render(request, "dashboard_tailor.html", {"tailor": tailor, "tasks": tasks, "stats": stats, "kpi_cards": kpi_cards})
 
 
 @login_required

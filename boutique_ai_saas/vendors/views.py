@@ -35,6 +35,12 @@ def vendor_dashboard(request):
         "tryon_sessions": TryOnSession.objects.filter(vendor=vendor).count(),
         "revenue": analytics.revenue,
     }
+    kpi_cards = [
+        {"label": "Orders", "value": stats["orders"], "hint": "All time"},
+        {"label": "Products", "value": stats["products"], "hint": "Catalog items"},
+        {"label": "Try-On Sessions", "value": stats["tryon_sessions"], "hint": "Uploads + generations"},
+        {"label": "Revenue", "value": int(analytics.revenue or 0), "prefix": "₹", "hint": "From analytics"},
+    ]
     from .models import FeatureAccess
 
     enabled_features = set(
@@ -49,6 +55,7 @@ def vendor_dashboard(request):
             "vendor": vendor,
             "analytics": analytics,
             "stats": stats,
+            "kpi_cards": kpi_cards,
             "settings_form": settings_form,
             "enabled_features": enabled_features,
         },

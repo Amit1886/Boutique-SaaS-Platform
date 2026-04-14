@@ -18,6 +18,52 @@
     </style>
   </head>
   <body class="min-h-screen text-slate-900 dark:text-slate-100" x-data>
+    <div id="pageLoader" class="page-loader hidden">
+      <div class="glass rounded-2xl border border-slate-200/60 p-6 text-center neon-ring">
+        <div class="spinner mx-auto"></div>
+        <div class="mt-3 font-extrabold">Loading…</div>
+        <div class="mt-1 text-xs opacity-70">Cinematic transition</div>
+      </div>
+    </div>
+
+    <div id="cmdk" class="cmdk hidden" aria-hidden="true">
+      <div class="cmdk-panel">
+        <div class="cmdk-head">
+          <div class="pill">Ctrl K</div>
+          <input id="cmdk-input" class="cmdk-input" placeholder="Search… (Try: magic, demo, vendor, tailor)" autocomplete="off" />
+        </div>
+        <div class="cmdk-body">
+          <div id="cmdk-list" class="space-y-2"></div>
+          <div id="cmdk-empty" class="hidden text-sm opacity-70 p-3">No matches.</div>
+        </div>
+        <div class="cmdk-foot">↑ ↓ to navigate · Enter to open · Esc to close · Press “/” to open</div>
+      </div>
+    </div>
+
+    <div id="cmd-sources" class="hidden">
+      <a data-cmd data-title="Home" data-url="/" data-desc="Main landing" data-keywords="home landing" href="#"></a>
+      <a data-cmd data-title="Magic Studio" data-url="/magic/" data-desc="Cinematic try-on UI" data-keywords="magic tryon studio mirror 3d" href="#"></a>
+      <a data-cmd data-title="Demo Flow" data-url="{% url 'demo_flow' %}" data-desc="One-click testing checklist" data-keywords="demo seed testing" href="#"></a>
+      <a data-cmd data-title="Pricing" data-url="{% url 'pricing' %}" data-desc="Plans and features" data-keywords="plan pricing subscribe" href="#"></a>
+      <a data-cmd data-title="Trending" data-url="{% url 'trending' %}" data-desc="Popular templates" data-keywords="trending popular" href="#"></a>
+      {% if user.is_authenticated %}
+        <a data-cmd data-title="My Dashboard" data-url="{% url 'customer_dashboard' %}" data-desc="Orders and saved looks" data-keywords="customer dashboard orders wallet" href="#"></a>
+        <a data-cmd data-title="Wallet" data-url="{% url 'wallet_dashboard' %}" data-desc="Cashback and transactions" data-keywords="wallet cashback referral" href="#"></a>
+        <a data-cmd data-title="Favorites" data-url="{% url 'favorites' %}" data-desc="Templates and looks" data-keywords="favorites saved looks" href="#"></a>
+        <a data-cmd data-title="Vendor Dashboard" data-url="{% url 'vendor_dashboard' %}" data-desc="Manage boutique" data-keywords="vendor dashboard inventory pos analytics" href="#"></a>
+        <a data-cmd data-title="Tailor Dashboard" data-url="{% url 'tailor_dashboard' %}" data-desc="Tasks and payroll" data-keywords="tailor tasks payroll" href="#"></a>
+        <a data-cmd data-title="Logout" data-url="{% url 'logout' %}" data-desc="Sign out" data-keywords="logout signout" href="#"></a>
+      {% else %}
+        <a data-cmd data-title="Login" data-url="{% url 'login' %}" data-desc="Sign in" data-keywords="login signin" href="#"></a>
+        <a data-cmd data-title="Become a Vendor" data-url="{% url 'signup_vendor' %}" data-desc="Create boutique store" data-keywords="vendor signup store" href="#"></a>
+      {% endif %}
+      {% if current_vendor %}
+        <a data-cmd data-title="Open Store" data-url="/{{ current_vendor.subdomain }}/" data-desc="Current vendor storefront" data-keywords="store vendor" href="#"></a>
+        <a data-cmd data-title="Virtual Try-On" data-url="{% url 'virtual_upload' vendor=current_vendor.subdomain %}" data-desc="Upload for try-on" data-keywords="tryon upload templates" href="#"></a>
+      {% endif %}
+      <a data-cmd data-title="Django Admin" data-url="/admin/" data-desc="Admin panel" data-keywords="admin django" href="#"></a>
+    </div>
+
     <nav class="bg-white/90 dark:bg-slate-950/60 backdrop-blur border-b border-slate-200 dark:border-white/10 sticky top-0 z-50">
       <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
         <div class="flex items-center gap-3">
@@ -98,5 +144,7 @@
     <script src="{% static 'js/measurement_ai.js' %}"></script>
     <script src="{% static 'js/ar_tryon.js' %}"></script>
     <script src="{% static 'js/magic_ui.js' %}"></script>
+    <script src="{% static 'js/command_palette.js' %}"></script>
+    <script src="{% static 'js/kpi.js' %}"></script>
   </body>
 </html>

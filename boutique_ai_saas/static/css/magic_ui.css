@@ -108,6 +108,73 @@ body {
   box-shadow: 0 0 30px color-mix(in oklab, var(--magic) 25%, transparent);
 }
 
+/* Page loader */
+.page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: rgba(2, 6, 23, 0.25);
+  backdrop-filter: blur(10px);
+  display: grid;
+  place-items: center;
+}
+.page-loader.hidden { display: none; }
+.spinner {
+  width: 62px;
+  height: 62px;
+  border-radius: 999px;
+  border: 3px solid rgba(255,255,255,0.35);
+  border-top-color: color-mix(in oklab, var(--magic) 85%, white);
+  animation: spin 800ms linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Command palette */
+.cmdk {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  background: rgba(2, 6, 23, 0.35);
+  backdrop-filter: blur(12px);
+  padding: 18px;
+}
+.cmdk.hidden { display: none; }
+.cmdk-panel {
+  max-width: 720px;
+  margin: 8vh auto 0;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: color-mix(in oklab, white 75%, transparent);
+  box-shadow: 0 24px 90px rgba(0,0,0,0.35);
+}
+html.dark .cmdk-panel {
+  background: rgba(17, 24, 39, 0.72);
+  border-color: rgba(255,255,255,0.12);
+}
+.cmdk-head {
+  padding: 12px 12px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.cmdk-input {
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(255,255,255,0.7);
+  padding: 12px 12px;
+}
+html.dark .cmdk-input {
+  background: rgba(0,0,0,0.22);
+  border-color: rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.92);
+}
+.cmdk-body { padding: 12px; }
+.cmdk-foot { padding: 10px 12px; border-top: 1px solid rgba(148,163,184,0.25); font-size: 12px; color: rgba(15,23,42,0.62); }
+html.dark .cmdk-foot { color: rgba(255,255,255,0.62); border-top-color: rgba(255,255,255,0.10); }
+
 /* Dark mode (Tailwind: html.dark) */
 html.dark body {
   background:
